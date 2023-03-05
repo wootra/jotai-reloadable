@@ -1,0 +1,38 @@
+{
+    "name": "jotai-reloadable",
+    "version": "1.0.0",
+    "description": "this allows jotai/utils/loadable reloadable. you should install jotai to use this module. ",
+    "main": "dist/reloadable.js",
+    "scripts": {
+        "test": "jest",
+        "build": "rm -rf ./dist; rm -rf ./sample/node_modules; rm ./sample/pnpm-lock.yaml; tsc; cd sample; pnpm install"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@github.com/wootra/jotai-reloadable.git"
+    },
+    "keywords": [
+        "jotai",
+        "loadable",
+        "reloadable",
+        "jotai-reloadable"
+    ],
+    "author": "Songhyeon Jun (shjeon0730@gmail.com)",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/wootra/jotai-reloadable/issues"
+    },
+    "homepage": "https://github.com/wootra/jotai-reloadable#readme",
+    "peerDependencies": {
+        "react": ">=17.0.0",
+        "jotai": ">= 1.0.0 < 3"
+    },
+    "peerDependenciesMeta": {
+        "react": {
+            "optional": true
+        }
+    },
+    "devDependencies": {
+        "typescript": "^4.9.5"
+    }
+}
