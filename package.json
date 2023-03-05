@@ -1,6 +1,6 @@
 {
     "name": "jotai-reloadable",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "description": "this allows jotai/utils/loadable reloadable. you should install jotai to use this module. ",
     "main": "dist/reloadable.js",
     "scripts": {
