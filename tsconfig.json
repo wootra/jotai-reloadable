@@ -8,5 +8,10 @@
         "strict": true
     },
     "include": ["./src/**/*"],
-    "exclude": ["./node_modules/**/*", "./sample/**/*", "./dist/**/*"]
+    "exclude": [
+        "./node_modules/**/*",
+        "./sample/**/*",
+        "./sampleJotaiV1/**/*",
+        "./dist/**/*"
+    ]
 }

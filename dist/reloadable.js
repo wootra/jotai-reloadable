@@ -20,8 +20,8 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.reloadable = void 0;
-var utils_1 = require("jotai/vanilla/utils");
-var vanilla_1 = require("jotai/vanilla");
+var utils_1 = require("jotai/utils");
+var jotai_1 = require("jotai");
 /**
  *
  * @param func function difinition.
@@ -32,39 +32,34 @@ var vanilla_1 = require("jotai/vanilla");
 function reloadable(func, initArgs, options) {
     if (initArgs === void 0) { initArgs = []; }
     if (options === void 0) { options = { forceReload: false }; }
-    var reloadableDataAtom = (0, vanilla_1.atom)((0, utils_1.loadable)((0, vanilla_1.atom)(func.apply(void 0, initArgs))));
-    var reloadableAtom = (0, vanilla_1.atom)(function (get) {
-        var loadableAtom = get(reloadableDataAtom);
-        var ret = get(loadableAtom);
+    var reloadableDataAtom = (0, jotai_1.atom)(func.apply(void 0, initArgs));
+    var reloadableAtom = (0, jotai_1.atom)(function (get) {
+        var ret = get((0, utils_1.loadable)(reloadableDataAtom));
         return ret;
     }, function (get, set, action) {
-        if (action === void 0) { action = {
-            args: [],
-            options: {},
-        }; }
-        var currAtom = get(reloadableDataAtom);
-        var state = get(currAtom).state;
+        if (action === void 0) { action = initArgs; }
+        var state = get((0, utils_1.loadable)(reloadableDataAtom)).state;
         if (state === 'loading')
             return; // when it is already loading, it does not try to load again.
+        if (action &&
+            !Array.isArray(action) &&
+            action.args &&
+            !Array.isArray(action.args)) {
+            throw new Error('action or action.args should be an array.');
+        }
         var args = Array.isArray(action)
             ? action
             : (action === null || action === void 0 ? void 0 : action.args) || initArgs;
-        if (!Array.isArray(action) &&
-            action &&
-            !(action === null || action === void 0 ? void 0 : action.args) &&
-            !Array.isArray(action === null || action === void 0 ? void 0 : action.args)) {
-            throw new Error('action or action.args should be an array.');
-        }
         var currOptions = Array.isArray(action)
             ? options
             : (action === null || action === void 0 ? void 0 : action.options) || options;
         if (state === 'hasData') {
-            if (currOptions.forceReload) {
-                set(reloadableDataAtom, (0, utils_1.loadable)((0, vanilla_1.atom)(func.apply(void 0, args))));
+            if (currOptions === null || currOptions === void 0 ? void 0 : currOptions.forceReload) {
+                set(reloadableDataAtom, func.apply(void 0, args));
             }
         }
         else {
-            set(reloadableDataAtom, (0, utils_1.loadable)((0, vanilla_1.atom)(func.apply(void 0, args))));
+            set(reloadableDataAtom, func.apply(void 0, args));
         }
     });
     return reloadableAtom;

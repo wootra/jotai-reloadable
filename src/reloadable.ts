@@ -18,12 +18,17 @@
  *
  */
 
-import { loadable } from 'jotai/vanilla/utils';
-import { atom } from 'jotai/vanilla';
+import { loadable } from 'jotai/utils';
+import { atom } from 'jotai';
 
-interface ReloadableOptions {
+export type ReloadableOptions = {
     forceReload?: boolean; // default is false
-}
+};
+
+export type ArgsWithOptions<T> = {
+    args?: T;
+    options: ReloadableOptions;
+};
 
 /**
  *
@@ -32,51 +37,42 @@ interface ReloadableOptions {
  * @param options default is { reloadOnlyError: true }
  * @returns
  */
-export function reloadable<T, ARGS extends Array<unknown> | []>(
-    func:
-        | ((...args: ARGS) => Promise<T>)
-        | ((...args: ARGS) => Promise<unknown>),
-    initArgs: ARGS = [] as ARGS,
+export function reloadable<T, ARGS extends any[]>(
+    func: (...args: ARGS) => Promise<T>,
+    initArgs = [] as unknown[] as ARGS,
     options: ReloadableOptions = { forceReload: false }
 ) {
-    const reloadableDataAtom = atom(loadable(atom(func(...initArgs))));
+    const reloadableDataAtom = atom(func(...initArgs));
+
     const reloadableAtom = atom(
         get => {
-            const loadableAtom = get(reloadableDataAtom);
-            const ret = get(loadableAtom);
+            const ret = get(loadable(reloadableDataAtom));
             return ret;
         },
-        (
-            get,
-            set,
-            action: ARGS | { args?: ARGS; options: ReloadableOptions } = {
-                args: [] as ARGS,
-                options: {} as ReloadableOptions,
-            }
-        ) => {
-            const currAtom = get(reloadableDataAtom);
-            const { state } = get(currAtom);
+        (get, set, action: ARGS | ArgsWithOptions<ARGS> = initArgs) => {
+            const { state } = get(loadable(reloadableDataAtom));
             if (state === 'loading') return; // when it is already loading, it does not try to load again.
-            const args = Array.isArray(action)
-                ? action
-                : action?.args || initArgs;
+
             if (
-                !Array.isArray(action) &&
                 action &&
-                !action?.args &&
-                !Array.isArray(action?.args)
+                !Array.isArray(action) &&
+                action.args &&
+                !Array.isArray(action.args)
             ) {
                 throw new Error('action or action.args should be an array.');
             }
+            const args = Array.isArray(action)
+                ? action
+                : action?.args || initArgs;
             const currOptions = Array.isArray(action)
                 ? options
                 : action?.options || options;
             if (state === 'hasData') {
-                if (currOptions.forceReload) {
-                    set(reloadableDataAtom, loadable(atom(func(...args))));
+                if (currOptions?.forceReload) {
+                    set(reloadableDataAtom, func(...args));
                 }
             } else {
-                set(reloadableDataAtom, loadable(atom(func(...args))));
+                set(reloadableDataAtom, func(...args));
             }
         }
     );

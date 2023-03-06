@@ -17,9 +17,13 @@
  * and saved in https://github.com/wootra/jotai-reloadable for the first time.
  *
  */
-interface ReloadableOptions {
+export type ReloadableOptions = {
     forceReload?: boolean;
-}
+};
+export type ArgsWithOptions<T> = {
+    args?: T;
+    options: ReloadableOptions;
+};
 /**
  *
  * @param func function difinition.
@@ -27,8 +31,4 @@ interface ReloadableOptions {
  * @param options default is { reloadOnlyError: true }
  * @returns
  */
-export declare function reloadable<T, ARGS extends Array<unknown> | []>(func: ((...args: ARGS) => Promise<T>) | ((...args: ARGS) => Promise<unknown>), initArgs?: ARGS, options?: ReloadableOptions): import("jotai/vanilla").WritableAtom<import("jotai/vanilla/utils/loadable").Loadable<Promise<unknown>>, [action?: ARGS | {
-    args?: ARGS | undefined;
-    options: ReloadableOptions;
-} | undefined], void>;
-export {};
+export declare function reloadable<T, ARGS extends any[]>(func: (...args: ARGS) => Promise<T>, initArgs?: ARGS, options?: ReloadableOptions): import("jotai").WritableAtom<import("jotai/vanilla/utils/loadable").Loadable<Promise<T>>, [action?: ARGS | ArgsWithOptions<ARGS> | undefined], void>;

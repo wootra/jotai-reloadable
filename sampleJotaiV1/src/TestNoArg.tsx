@@ -1,8 +1,11 @@
 import React from 'react';
-import { createStore, useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { reloadable } from 'jotai-reloadable';
 
-const store = createStore();
+/**
+ * jotai v1 has typescript bug. should add @ts-ignore or use jsx.
+ */
+
 const countVal = { count: 0 };
 const testApi = async (): Promise<
     | { greeting: string; countVal: { count: number } }
@@ -23,11 +26,13 @@ const testApi = async (): Promise<
 const testLoadableAtom = reloadable(testApi);
 
 const Reload = () => {
+    const refresh = useSetAtom(testLoadableAtom);
     return (
         <button
             type='button'
             className='rounded-md bg-blue-600 text-white'
-            onClick={e => store.set(testLoadableAtom)}
+            // @ts-ignore
+            onClick={e => refresh()}
         >
             Reload
         </button>
@@ -35,12 +40,14 @@ const Reload = () => {
 };
 
 const ReloadForce = () => {
+    const refresh = useSetAtom(testLoadableAtom);
     return (
         <button
             type='button'
             className='rounded-md bg-blue-600 text-white'
             onClick={e =>
-                store.set(testLoadableAtom, {
+                refresh({
+                    // @ts-ignore
                     options: { forceReload: true },
                 })
             }
@@ -51,7 +58,7 @@ const ReloadForce = () => {
 };
 
 const TestData = () => {
-    const ret = useAtomValue(testLoadableAtom, { store: store });
+    const ret = useAtomValue(testLoadableAtom);
     return (
         <div className='flex h-full flex-1 flex-col gap-4 rounded-md'>
             <div className='h-auto flex-1 rounded-md bg-white'>
