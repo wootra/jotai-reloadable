@@ -1281,9 +1281,9 @@ packages:
     resolution: {directory: .., type: directory}
     id: file:..
     name: jotai-reloadable
-    version: 1.0.0
+    version: 1.0.1
     peerDependencies:
-      jotai: '>= 1.0.0 < 3'
+      jotai: '>= 2.0.0 < 3'
       react: '>=17.0.0'
     peerDependenciesMeta:
       react:
