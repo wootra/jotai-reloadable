@@ -1,5 +1,9 @@
 # jotai-reloadable
 
+## limitation
+
+this library is tested in jotai-v2. jotai-v1 has an issue that fails.
+
 ## Motivation
 
 loadable in jotai library is not re-loadable. I wanted to make it run again, but didn't have much luck
