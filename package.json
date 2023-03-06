@@ -1,6 +1,6 @@
 {
     "name": "jotai-reloadable",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "this allows jotai/utils/loadable reloadable. you should install jotai to use this module. ",
     "main": "dist/reloadable.js",
     "scripts": {
@@ -25,7 +25,7 @@
     "homepage": "https://github.com/wootra/jotai-reloadable#readme",
     "peerDependencies": {
         "react": ">=17.0.0",
-        "jotai": ">= 1.0.0 < 3"
+        "jotai": ">= 2.0.0 < 3"
     },
     "peerDependenciesMeta": {
         "react": {
