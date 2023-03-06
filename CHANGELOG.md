@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.0.3
+
+-   simplify logic around loadable.( reduce wraping levels of atom)
+-   add v1 examples to show how to avoid ts error.
+-   add jotai-v1 version as compatible version.
+
 ## 1.0.2
 
 -   republish since dist folder was corrupted
