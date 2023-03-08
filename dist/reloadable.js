@@ -21,6 +21,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.reloadable = void 0;
 var jotai_1 = require("jotai");
+var SELF_RELOAD = '--self-reload--';
 /**
  *
  * @param func function difinition.
@@ -36,7 +37,7 @@ function reloadable(func, initArgs, options) {
     reloadablePromiseAtom.debugLabel = 'reloadable__reloadablePromiseAtom';
     var resetAtom = (0, jotai_1.atom)(0);
     resetAtom.debugLabel = 'reloadable__resetAtom';
-    var selfReloadOption = { self: true, secret: 0 };
+    var selfReloadOption = SELF_RELOAD;
     var reloadableAtom = (0, jotai_1.atom)(function (get, _a) {
         var setSelf = _a.setSelf;
         var data = statusHolder.value;
@@ -57,7 +58,7 @@ function reloadable(func, initArgs, options) {
         return statusHolder.value;
     }, function (get, set, action) {
         if (action === void 0) { action = initArgs; }
-        if ((action === null || action === void 0 ? void 0 : action.secret) === selfReloadOption.secret) {
+        if (action === SELF_RELOAD) {
             set(resetAtom, get(resetAtom) + 1);
             return;
         }
@@ -85,7 +86,7 @@ function getCurrentValue(action, initArgs, options) {
     if (Array.isArray(action)) {
         return [action, options];
     }
-    else if (Array.isArray(action.args)) {
+    else if (typeof action.options === 'object') {
         var act = action;
         return [act.args || initArgs, act.options || options];
     }

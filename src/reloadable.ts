@@ -32,13 +32,14 @@ export type ArgsWithOptions<T> = {
     options: ReloadableOptions;
 };
 
+const SELF_RELOAD = '--self-reload--';
+export type SelfReloadOption = typeof SELF_RELOAD;
+
 export type ReloadableAtom<T, ARGS extends any[]> = WritableAtom<
     Loadable<T>,
     [action?: SelfReloadOption | ARGS | ArgsWithOptions<ARGS> | undefined],
     void
 >;
-
-export type SelfReloadOption = { self: true; secret: number };
 
 type Reloadable<Value> =
     | { state: 'loading' }
@@ -63,7 +64,8 @@ export function reloadable<T, ARGS extends any[]>(
     reloadablePromiseAtom.debugLabel = 'reloadable__reloadablePromiseAtom';
     const resetAtom = atom(0);
     resetAtom.debugLabel = 'reloadable__resetAtom';
-    const selfReloadOption = { self: true, secret: 0 };
+    const selfReloadOption = SELF_RELOAD;
+
     const reloadableAtom = atom(
         (get, { setSelf }) => {
             const data = statusHolder.value;
@@ -88,9 +90,7 @@ export function reloadable<T, ARGS extends any[]>(
             set,
             action: ARGS | ArgsWithOptions<ARGS> | SelfReloadOption = initArgs
         ) => {
-            if (
-                (action as SelfReloadOption)?.secret === selfReloadOption.secret
-            ) {
+            if (action === SELF_RELOAD) {
                 set(resetAtom, get(resetAtom) + 1);
                 return;
             }
@@ -125,7 +125,7 @@ function getCurrentValue<ARGS>(
 ) {
     if (Array.isArray(action)) {
         return [action, options] as [ARGS, ReloadableOptions];
-    } else if (Array.isArray((action as ArgsWithOptions<ARGS>).args)) {
+    } else if (typeof (action as ArgsWithOptions<ARGS>).options === 'object') {
         const act = action as ArgsWithOptions<ARGS>;
         return [act.args || (initArgs as ARGS), act.options || options] as [
             ARGS,

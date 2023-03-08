@@ -27,13 +27,11 @@ export type ArgsWithOptions<T> = {
     args?: T;
     options: ReloadableOptions;
 };
+declare const SELF_RELOAD = "--self-reload--";
+export type SelfReloadOption = typeof SELF_RELOAD;
 export type ReloadableAtom<T, ARGS extends any[]> = WritableAtom<Loadable<T>, [
     action?: SelfReloadOption | ARGS | ArgsWithOptions<ARGS> | undefined
 ], void>;
-export type SelfReloadOption = {
-    self: true;
-    secret: number;
-};
 /**
  *
  * @param func function difinition.
@@ -42,3 +40,4 @@ export type SelfReloadOption = {
  * @returns
  */
 export declare function reloadable<T, ARGS extends any[]>(func: (...args: ARGS) => Promise<T>, initArgs?: ARGS, options?: ReloadableOptions): ReloadableAtom<T, ARGS>;
+export {};
