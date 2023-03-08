@@ -1,4 +1,4 @@
-import React from 'react';
+// @ts-nocheck
 import { createStore, useAtomValue } from 'jotai';
 import { reloadable } from 'jotai-reloadable';
 

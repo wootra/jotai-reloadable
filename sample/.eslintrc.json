@@ -1,0 +1,11 @@
+{
+    "plugins": ["jest", "react"],
+    "ignorePatterns": ["node_modules/", "dist/", "*.config.js"],
+    "parserOptions": {
+        "ecmaVersion": 2020,
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    }
+}

@@ -28,6 +28,7 @@ const LoadPass = ({ forced }: { forced: boolean } = { forced: true }) => {
     return (
         <button
             type='button'
+            data-testid={'load-pass-' + forced ? 'forced' : ''}
             className='rounded-md bg-blue-600 text-white'
             onClick={e =>
                 forced
@@ -46,6 +47,7 @@ const LoadPass = ({ forced }: { forced: boolean } = { forced: true }) => {
 const LoadFail = ({ forced }: { forced: boolean } = { forced: true }) => {
     return (
         <button
+            data-testid={'load-fail' + forced ? 'forced' : ''}
             className='rounded-md bg-blue-600 text-white'
             onClick={e =>
                 forced
@@ -66,7 +68,7 @@ const TestData = () => {
     return (
         <div className='flex h-full flex-1 flex-col gap-4 rounded-md'>
             <div className='h-auto flex-1 rounded-md bg-white'>
-                <pre>{JSON.stringify(ret, null, 4)}</pre>
+                <pre data-testid='result'>{JSON.stringify(ret, null, 4)}</pre>
             </div>
             <div className='h-8 rounded-md bg-white'>
                 {ret.state === 'hasData' && JSON.stringify(ret.data)}
