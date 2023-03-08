@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.1.3
+
+- remove react from peer dependency
+
 ## 1.1.2
 
 - handle error argument
