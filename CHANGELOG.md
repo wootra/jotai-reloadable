@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.1.0
+
+-   remove loadable using pure atom
+
 ## 1.0.3
 
 -   simplify logic around loadable.( reduce wraping levels of atom)
