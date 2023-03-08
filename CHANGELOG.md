@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.1.2
+
+- handle error argument
+- add unit tests
+
 ## 1.1.1
 
 - change self reload object into string.(overly complex)

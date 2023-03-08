@@ -1,5 +1,6 @@
 import React from 'react';
-import { createStore, useAtomValue } from 'jotai';
+import { createStore } from 'jotai/vanilla';
+import { Provider, useAtomValue } from 'jotai/react';
 import { reloadable } from 'jotai-reloadable';
 
 const store = createStore();
@@ -63,12 +64,17 @@ const LoadFail = ({ forced }: { forced: boolean } = { forced: true }) => {
     );
 };
 
+let count = 0;
 const TestData = () => {
     const ret = useAtomValue(testLoadableAtom, { store: store });
+
     return (
         <div className='flex h-full flex-1 flex-col gap-4 rounded-md'>
             <div className='h-auto flex-1 rounded-md bg-white'>
-                <pre data-testid='result'>{JSON.stringify(ret, null, 4)}</pre>
+                <pre data-testid='result' id='result'>
+                    count is: {count++}
+                    {JSON.stringify(ret, null, 4)}
+                </pre>
             </div>
             <div className='h-8 rounded-md bg-white'>
                 {ret.state === 'hasData' && JSON.stringify(ret.data)}
@@ -81,15 +87,17 @@ const TestData = () => {
 
 const Test = () => {
     return (
-        <div className='flex h-96 w-[600px] flex-row gap-4 border border-gray-400 bg-slate-200 p-4'>
-            <TestData />
-            <div className='flex w-32 flex-col justify-center gap-4'>
-                <LoadPass forced={true} />
-                <LoadPass forced={false} />
-                <LoadFail forced={true} />
-                <LoadFail forced={false} />
+        <Provider store={store}>
+            <div className='flex h-96 w-[600px] flex-row gap-4 border border-gray-400 bg-slate-200 p-4'>
+                <TestData />
+                <div className='flex w-32 flex-col justify-center gap-4'>
+                    <LoadPass forced={true} />
+                    <LoadPass forced={false} />
+                    <LoadFail forced={true} />
+                    <LoadFail forced={false} />
+                </div>
             </div>
-        </div>
+        </Provider>
     );
 };
 

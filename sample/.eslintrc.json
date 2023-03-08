@@ -1,6 +1,11 @@
 {
-    "plugins": ["jest", "react", "react-dom"],
-    "ignorePatterns": ["node_modules/", "dist/", "*.config.js"],
+    "plugins": ["jest", "react"],
+    "ignorePatterns": [
+        "node_modules/",
+        "dist/",
+        "*.config.js",
+        "setupTests.ts"
+    ],
     "parserOptions": {
         "ecmaVersion": 2020,
         "sourceType": "module",

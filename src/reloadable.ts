@@ -22,9 +22,13 @@ import type { Atom, WritableAtom } from 'jotai';
 import { atom } from 'jotai';
 import { Loadable } from 'jotai/vanilla/utils/loadable';
 
+export type ReloadableInitOptions = {
+    forceReload?: boolean; // default is false
+    printError?: boolean; // default is false
+};
+
 export type ReloadableOptions = {
     forceReload?: boolean; // default is false
-    self?: boolean;
 };
 
 export type ArgsWithOptions<T> = {
@@ -36,7 +40,7 @@ const SELF_RELOAD = '--self-reload--';
 export type SelfReloadOption = typeof SELF_RELOAD;
 
 export type ReloadableAtom<T, ARGS extends any[]> = WritableAtom<
-    Loadable<T>,
+    Loadable<Awaited<T>>,
     [action?: SelfReloadOption | ARGS | ArgsWithOptions<ARGS> | undefined],
     void
 >;
@@ -57,10 +61,23 @@ type Reloadable<Value> =
 export function reloadable<T, ARGS extends any[]>(
     func: (...args: ARGS) => Promise<T>,
     initArgs = [] as unknown[] as ARGS,
-    options: ReloadableOptions = { forceReload: false }
+    options: ReloadableInitOptions = { forceReload: false }
 ): ReloadableAtom<T, ARGS> {
     const statusHolder: { value: Reloadable<T> } = { value: { state: 'init' } };
-    const reloadablePromiseAtom = atom(func(...initArgs));
+    const PromiseWrapper = async (...args: ARGS) => {
+        try {
+            const data = await func(...args);
+            return { state: 'hasData', data };
+        } catch (e) {
+            if (options.printError) console.error(e);
+            if (e instanceof Error) {
+                return { state: 'hasError', error: e.message };
+            } else {
+                return { state: 'hasError', error: e };
+            }
+        }
+    };
+    const reloadablePromiseAtom = atom(PromiseWrapper(...initArgs));
     reloadablePromiseAtom.debugLabel = 'reloadable__reloadablePromiseAtom';
     const resetAtom = atom(0);
     resetAtom.debugLabel = 'reloadable__resetAtom';
@@ -75,8 +92,9 @@ export function reloadable<T, ARGS extends any[]>(
                 statusHolder.value = { state: 'loading' };
                 promise
                     .then(result => {
-                        statusHolder.value = { state: 'hasData', data: result };
+                        statusHolder.value = result as Loadable<T>; // this could be hasError or hasData
                         setSelf(selfReloadOption);
+                        return result; // this could be hasError or hasData
                     })
                     .catch(err => {
                         statusHolder.value = { state: 'hasError', error: err };
@@ -88,7 +106,7 @@ export function reloadable<T, ARGS extends any[]>(
         (
             get,
             set,
-            action: ARGS | ArgsWithOptions<ARGS> | SelfReloadOption = initArgs
+            action: ARGS | ArgsWithOptions<ARGS> | SelfReloadOption | undefined
         ) => {
             if (action === SELF_RELOAD) {
                 set(resetAtom, get(resetAtom) + 1);
@@ -106,11 +124,11 @@ export function reloadable<T, ARGS extends any[]>(
             if (state === 'hasData') {
                 if (currOptions?.forceReload) {
                     statusHolder.value = { state: 'init' };
-                    set(reloadablePromiseAtom, func(...currArgs));
+                    set(reloadablePromiseAtom, PromiseWrapper(...currArgs));
                 }
             } else {
                 statusHolder.value = { state: 'init' };
-                set(reloadablePromiseAtom, func(...currArgs));
+                set(reloadablePromiseAtom, PromiseWrapper(...currArgs));
             }
         }
     );
@@ -119,19 +137,36 @@ export function reloadable<T, ARGS extends any[]>(
 }
 
 function getCurrentValue<ARGS>(
-    action: ARGS | ArgsWithOptions<ARGS> | SelfReloadOption,
+    action: ARGS | ArgsWithOptions<ARGS> | SelfReloadOption | undefined,
     initArgs: ARGS,
     options: ReloadableOptions
 ) {
     if (Array.isArray(action)) {
         return [action, options] as [ARGS, ReloadableOptions];
-    } else if (typeof (action as ArgsWithOptions<ARGS>).options === 'object') {
+    } else if (typeof (action as ArgsWithOptions<ARGS>)?.options === 'object') {
         const act = action as ArgsWithOptions<ARGS>;
         return [act.args || (initArgs as ARGS), act.options || options] as [
             ARGS,
             ReloadableOptions
         ];
     } else {
+        checkActionType<ARGS>(
+            action as ARGS | ArgsWithOptions<ARGS> | undefined
+        );
         return [initArgs, options] as [ARGS, ReloadableOptions];
+    }
+}
+
+function checkActionType<ARGS>(
+    action: ARGS | ArgsWithOptions<ARGS> | undefined
+) {
+    if (
+        action !== undefined &&
+        !Array.isArray(action) &&
+        typeof action !== 'object'
+    ) {
+        throw new Error(
+            `reloadable atom should be called with one of the types: array(function's argument), { args?:[], } `
+        );
     }
 }

@@ -30,5 +30,5 @@
         "src/*.jsx",
         "src/*.test.*"
     ],
-    "exclude": ["node_modules"]
+    "exclude": ["node_modules", "setupTests.ts"]
 }

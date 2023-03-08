@@ -6,7 +6,8 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "test": "vitest",
+        "test": "vitest src",
+        "tt": "jest src",
         "preview": "vite preview"
     },
     "dependencies": {
@@ -17,7 +18,7 @@
     },
     "devDependencies": {
         "@testing-library/react": "^14.0.0",
-        "@types/jest": "^29.4.0",
+        "@testing-library/user-event": "^14.4.3",
         "@types/react": "^18.0.27",
         "@types/react-dom": "^18.0.10",
         "@vitejs/plugin-react": "^3.1.0",

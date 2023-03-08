@@ -19,9 +19,12 @@
  */
 import type { WritableAtom } from 'jotai';
 import { Loadable } from 'jotai/vanilla/utils/loadable';
+export type ReloadableInitOptions = {
+    forceReload?: boolean;
+    printError?: boolean;
+};
 export type ReloadableOptions = {
     forceReload?: boolean;
-    self?: boolean;
 };
 export type ArgsWithOptions<T> = {
     args?: T;
@@ -29,7 +32,7 @@ export type ArgsWithOptions<T> = {
 };
 declare const SELF_RELOAD = "--self-reload--";
 export type SelfReloadOption = typeof SELF_RELOAD;
-export type ReloadableAtom<T, ARGS extends any[]> = WritableAtom<Loadable<T>, [
+export type ReloadableAtom<T, ARGS extends any[]> = WritableAtom<Loadable<Awaited<T>>, [
     action?: SelfReloadOption | ARGS | ArgsWithOptions<ARGS> | undefined
 ], void>;
 /**
@@ -39,5 +42,5 @@ export type ReloadableAtom<T, ARGS extends any[]> = WritableAtom<Loadable<T>, [
  * @param options default is { reloadOnlyError: true }
  * @returns
  */
-export declare function reloadable<T, ARGS extends any[]>(func: (...args: ARGS) => Promise<T>, initArgs?: ARGS, options?: ReloadableOptions): ReloadableAtom<T, ARGS>;
+export declare function reloadable<T, ARGS extends any[]>(func: (...args: ARGS) => Promise<T>, initArgs?: ARGS, options?: ReloadableInitOptions): ReloadableAtom<T, ARGS>;
 export {};

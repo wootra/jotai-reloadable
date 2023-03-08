@@ -7,8 +7,8 @@
         "test1": "cd sample; pnpm run test --run",
         "test2": "cd sampleJotaiV1; pnpm run test --run",
         "test": "pnpm run test1; pnpm run test2",
-        "clear1": "rm -rf $CURRPATH/sample/node_modules; rm $CURRPATH/sample/pnpm-lock.yaml; cd $CURRPATH/sample; pnpm install",
-        "clear2": "rm -rf $CURRPATH/sampleJotaiV1/node_modules; rm $CURRPATH/sampleJotaiV1/pnpm-lock.yaml; cd $CURRPATH/sampleJotaiV1; pnpm install",
+        "clear1": "cd $CURRPATH/sample; pnpm rm jotai-reloadable; pnpm i jotai-reloadable@file:..",
+        "clear2": "cd $CURRPATH/sampleJotaiV1; pnpm rm jotai-reloadable; pnpm i jotai-reloadable@file:..",
         "build": "rm -rf ./dist; tsc; CURRPATH=$(pwd) pnpm run clear1 ; CURRPATH=$(pwd) pnpm run clear2"
     },
     "repository": {
