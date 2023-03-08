@@ -20,7 +20,6 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.reloadable = void 0;
-var utils_1 = require("jotai/utils");
 var jotai_1 = require("jotai");
 /**
  *
@@ -32,36 +31,65 @@ var jotai_1 = require("jotai");
 function reloadable(func, initArgs, options) {
     if (initArgs === void 0) { initArgs = []; }
     if (options === void 0) { options = { forceReload: false }; }
-    var reloadableDataAtom = (0, jotai_1.atom)(func.apply(void 0, initArgs));
-    var reloadableAtom = (0, jotai_1.atom)(function (get) {
-        var ret = get((0, utils_1.loadable)(reloadableDataAtom));
-        return ret;
+    var statusHolder = { value: { state: 'init' } };
+    var reloadablePromiseAtom = (0, jotai_1.atom)(func.apply(void 0, initArgs));
+    reloadablePromiseAtom.debugLabel = 'reloadable__reloadablePromiseAtom';
+    var resetAtom = (0, jotai_1.atom)(0);
+    resetAtom.debugLabel = 'reloadable__resetAtom';
+    var selfReloadOption = { self: true, secret: 0 };
+    var reloadableAtom = (0, jotai_1.atom)(function (get, _a) {
+        var setSelf = _a.setSelf;
+        var data = statusHolder.value;
+        var promise = get(reloadablePromiseAtom);
+        get(resetAtom); // just for reset
+        if (data.state === 'init') {
+            statusHolder.value = { state: 'loading' };
+            promise
+                .then(function (result) {
+                statusHolder.value = { state: 'hasData', data: result };
+                setSelf(selfReloadOption);
+            })
+                .catch(function (err) {
+                statusHolder.value = { state: 'hasError', error: err };
+                setSelf(selfReloadOption);
+            });
+        }
+        return statusHolder.value;
     }, function (get, set, action) {
         if (action === void 0) { action = initArgs; }
-        var state = get((0, utils_1.loadable)(reloadableDataAtom)).state;
-        if (state === 'loading')
-            return; // when it is already loading, it does not try to load again.
-        if (action &&
-            !Array.isArray(action) &&
-            action.args &&
-            !Array.isArray(action.args)) {
-            throw new Error('action or action.args should be an array.');
+        if ((action === null || action === void 0 ? void 0 : action.secret) === selfReloadOption.secret) {
+            set(resetAtom, get(resetAtom) + 1);
+            return;
         }
-        var args = Array.isArray(action)
-            ? action
-            : (action === null || action === void 0 ? void 0 : action.args) || initArgs;
-        var currOptions = Array.isArray(action)
-            ? options
-            : (action === null || action === void 0 ? void 0 : action.options) || options;
+        var ret = statusHolder.value;
+        var state = ret.state;
+        if (state === 'loading' || state === 'init')
+            return; // when it is already loading, it does not try to load again.
+        var _a = getCurrentValue(action, initArgs, options), currArgs = _a[0], currOptions = _a[1];
         if (state === 'hasData') {
             if (currOptions === null || currOptions === void 0 ? void 0 : currOptions.forceReload) {
-                set(reloadableDataAtom, func.apply(void 0, args));
+                statusHolder.value = { state: 'init' };
+                set(reloadablePromiseAtom, func.apply(void 0, currArgs));
             }
         }
         else {
-            set(reloadableDataAtom, func.apply(void 0, args));
+            statusHolder.value = { state: 'init' };
+            set(reloadablePromiseAtom, func.apply(void 0, currArgs));
         }
     });
+    reloadableAtom.debugLabel = 'reloadable__reloadableAtom';
     return reloadableAtom;
 }
 exports.reloadable = reloadable;
+function getCurrentValue(action, initArgs, options) {
+    if (Array.isArray(action)) {
+        return [action, options];
+    }
+    else if (Array.isArray(action.args)) {
+        var act = action;
+        return [act.args || initArgs, act.options || options];
+    }
+    else {
+        return [initArgs, options];
+    }
+}

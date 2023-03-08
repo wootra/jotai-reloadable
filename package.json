@@ -5,9 +5,9 @@
     "main": "dist/reloadable.js",
     "scripts": {
         "test": "jest",
-        "clear1": "rm -rf $CURRPATH/sample/node_modules/jotai-reloadable; rm $CURRPATH/sample/pnpm-lock.yaml; cd $CURRPATH/sample; pnpm install",
-        "clear2": "rm -rf $CURRPATH/sampleJotaiV1/node_modules/jotai-reloadable; rm $CURRPATH/sampleJotaiV1/pnpm-lock.yaml; cd $CURRPATH/sampleJotaiV1; pnpm install",
-        "build": "rm -rf ./dist; tsc; CURRPATH=$(pwd) pnpm run clear1 & CURRPATH=$(pwd) pnpm run clear2"
+        "clear1": "rm -rf $CURRPATH/sample/node_modules; rm $CURRPATH/sample/pnpm-lock.yaml; cd $CURRPATH/sample; pnpm install",
+        "clear2": "rm -rf $CURRPATH/sampleJotaiV1/node_modules; rm $CURRPATH/sampleJotaiV1/pnpm-lock.yaml; cd $CURRPATH/sampleJotaiV1; pnpm install",
+        "build": "rm -rf ./dist; tsc; CURRPATH=$(pwd) pnpm run clear1 ; CURRPATH=$(pwd) pnpm run clear2"
     },
     "repository": {
         "type": "git",

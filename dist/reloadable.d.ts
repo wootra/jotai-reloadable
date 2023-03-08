@@ -17,12 +17,22 @@
  * and saved in https://github.com/wootra/jotai-reloadable for the first time.
  *
  */
+import type { WritableAtom } from 'jotai';
+import { Loadable } from 'jotai/vanilla/utils/loadable';
 export type ReloadableOptions = {
     forceReload?: boolean;
+    self?: boolean;
 };
 export type ArgsWithOptions<T> = {
     args?: T;
     options: ReloadableOptions;
+};
+export type ReloadableAtom<T, ARGS extends any[]> = WritableAtom<Loadable<T>, [
+    action?: SelfReloadOption | ARGS | ArgsWithOptions<ARGS> | undefined
+], void>;
+export type SelfReloadOption = {
+    self: true;
+    secret: number;
 };
 /**
  *
@@ -31,4 +41,4 @@ export type ArgsWithOptions<T> = {
  * @param options default is { reloadOnlyError: true }
  * @returns
  */
-export declare function reloadable<T, ARGS extends any[]>(func: (...args: ARGS) => Promise<T>, initArgs?: ARGS, options?: ReloadableOptions): import("jotai").WritableAtom<import("jotai/vanilla/utils/loadable").Loadable<Promise<T>>, [action?: ARGS | ArgsWithOptions<ARGS> | undefined], void>;
+export declare function reloadable<T, ARGS extends any[]>(func: (...args: ARGS) => Promise<T>, initArgs?: ARGS, options?: ReloadableOptions): ReloadableAtom<T, ARGS>;
