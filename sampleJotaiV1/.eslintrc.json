@@ -1,5 +1,5 @@
 {
-    "plugins": ["jest", "react", "react-dom"],
+    "plugins": ["jest", "react"],
     "ignorePatterns": ["node_modules/", "dist/", "*.config.js"],
     "parserOptions": {
         "ecmaVersion": 2020,

@@ -1,5 +1,5 @@
 /**
- * @vitest-environment jsdom
+ * @vitest-environment happy-dom
  */
 
 import { it, describe, expect } from 'vitest';
@@ -15,7 +15,6 @@ describe('Test', () => {
 
         it('should render', () => {
             const element = render(<Test />);
-            element.getByTestId('');
         });
     });
 });

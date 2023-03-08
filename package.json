@@ -4,8 +4,8 @@
     "description": "this allows jotai/utils/loadable reloadable. you should install jotai to use this module. ",
     "main": "dist/reloadable.js",
     "scripts": {
-        "test1": "cd sample; pnpm run test",
-        "test2": "cd sampleJotaiV1; pnpm run test",
+        "test1": "cd sample; pnpm run test --run",
+        "test2": "cd sampleJotaiV1; pnpm run test --run",
         "test": "pnpm run test1; pnpm run test2",
         "clear1": "rm -rf $CURRPATH/sample/node_modules; rm $CURRPATH/sample/pnpm-lock.yaml; cd $CURRPATH/sample; pnpm install",
         "clear2": "rm -rf $CURRPATH/sampleJotaiV1/node_modules; rm $CURRPATH/sampleJotaiV1/pnpm-lock.yaml; cd $CURRPATH/sampleJotaiV1; pnpm install",

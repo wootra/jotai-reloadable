@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
-        "target": "ES2015",
-        "lib": ["dom", "dom.iterable", "ES2015"],
+        "target": "es2017",
+        "lib": ["dom", "dom.iterable", "esnext"],
         "allowJs": true,
         "checkJs": true,
         "skipLibCheck": true,
@@ -9,7 +9,7 @@
         "forceConsistentCasingInFileNames": true,
         "noEmit": true,
         "esModuleInterop": true,
-        "module": "ES2015",
+        "module": "esnext",
         "moduleResolution": "node",
         "resolveJsonModule": true,
         "isolatedModules": true,
@@ -21,5 +21,13 @@
             "~/*": ["./src/*"]
         }
     },
-    "include": [".eslintrc.cjs", "**/*.ts", "**/*.tsx", "**/*.cjs", "**/*.mjs"]
+    "include": [
+        ".eslintrc.cjs",
+        "src/*.ts",
+        "src/*.tsx",
+        "src/*.cjs",
+        "src/*.mjs",
+        "src/*.jsx"
+    ],
+    "exclude": ["node_modules"]
 }
