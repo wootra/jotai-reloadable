@@ -1,0 +1,15 @@
+.vscode
+node_modules
+sample
+sampleJotaiV1
+src
+.eslintrc.json
+.gitignore
+.npmignore
+package.json
+README.md
+CHANGELOG.md
+setupTests.ts
+tsconfig.json
+vite.config.js
+vitest.config.ts

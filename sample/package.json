@@ -6,8 +6,6 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "test": "vitest src",
-        "tt": "jest src",
         "preview": "vite preview"
     },
     "dependencies": {

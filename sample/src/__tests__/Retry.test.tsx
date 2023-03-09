@@ -4,7 +4,6 @@
 
 import React, { useEffect, useState } from 'react'; // this line is essential to test react code
 import { it, describe, expect, vi, beforeEach, afterEach } from 'vitest';
-// import { Window } from 'happy-dom';
 import { render, screen, cleanup } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import { reloadable } from '../../../src/reloadable';
@@ -75,5 +74,88 @@ describe('Retry', () => {
                 window.document.getElementById('result')?.innerHTML
             ).toContain(JSON.stringify({ pass: true, count: 3 }));
         });
+    });
+});
+
+interface CancelablePromise<T> extends Promise<T> {
+    cancel: (isPass: boolean) => void;
+}
+
+describe('cancel promise', () => {
+    const testService = async (pass = true) => {
+        return new Promise((res, rej) => {
+            setTimeout(() => {
+                if (pass) res('service passed');
+                else rej('service failed');
+            }, 1000);
+        });
+    };
+    it('should cancel promise when service passes', async () => {
+        const aPromise = new Promise((res, rej) => {
+            testService().then(res).catch(rej);
+        })
+            .then(res => {
+                console.log('finished', res);
+                return res;
+            })
+            .catch(err => {
+                console.error('error', err);
+            });
+        // (aPromise as PromiseWithCancel<any>).canceled = true;
+        let cancel;
+        const cancelPromise = new Promise((res, rej) => {
+            const pass = res.bind(null, { canceled: true });
+            const fail = rej.bind(null, { canceled: true });
+            cancel = isPass => {
+                isPass ? pass() : fail();
+            };
+        });
+        const cancelablePromise = Object.assign(
+            Promise.race([aPromise, cancelPromise]),
+            { cancel }
+        );
+        cancelablePromise.cancel(true);
+        const res = await cancelablePromise;
+        expect(res).toStrictEqual({ canceled: true });
+
+        await new Promise(res => setTimeout(res, 2000)); // make this test wait
+    });
+
+    it('should cancel promise when service fails', async () => {
+        const aPromise = new Promise((res, rej) => {
+            testService(false).then(res).catch(rej);
+        })
+            .then(res => {
+                console.log('finished', res);
+                return res;
+            })
+            .catch(err => {
+                console.error('error', err);
+            });
+        // (aPromise as PromiseWithCancel<any>).canceled = true;
+        let cancel;
+        const cancelPromise = new Promise((res, rej) => {
+            const pass = res.bind(null, { canceled: true });
+            const fail = rej.bind(null, { canceled: true });
+            cancel = isPass => {
+                isPass ? pass() : fail();
+            };
+        });
+        const racePromise = Promise.race([aPromise, cancelPromise]);
+        const cancelablePromise = Object.assign(racePromise, {
+            cancel,
+        });
+
+        const afterCancelablePromise = cancelablePromise.then(res => {
+            console.log('promise after cancel is', res);
+            (res as any).runAfterCancel = true;
+            return res;
+        }) as CancelablePromise<any>;
+
+        cancelablePromise.cancel(true);
+        const res = await afterCancelablePromise;
+        expect(res).toStrictEqual({ canceled: true, runAfterCancel: true });
+
+        await new Promise(res => setTimeout(res, 2000)); // make this test wait
     });
 });
