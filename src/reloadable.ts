@@ -18,12 +18,13 @@
  *
  */
 
-import type { Atom, WritableAtom } from 'jotai';
+import type { WritableAtom } from 'jotai';
 import { atom } from 'jotai';
 import { Loadable } from 'jotai/vanilla/utils/loadable';
 
 export type ReloadableInitOptions = {
     forceReload?: boolean; // default is false
+    retry?: number; // default is 0
     printError?: boolean; // default is false
 };
 
@@ -64,11 +65,23 @@ export function reloadable<T, ARGS extends any[]>(
     options: ReloadableInitOptions = { forceReload: false }
 ): ReloadableAtom<T, ARGS> {
     const statusHolder: { value: Reloadable<T> } = { value: { state: 'init' } };
-    const PromiseWrapper = async (...args: ARGS) => {
+    const retrySate = { count: options.retry || 0, init: false };
+    const PromiseWrapper = async (...args: ARGS): Promise<Loadable<T>> => {
         try {
+            if (!retrySate.init) {
+                retrySate.init = true;
+                retrySate.count = options.retry || 0;
+            } else {
+                retrySate.count--;
+            }
             const data = await func(...args);
-            return { state: 'hasData', data };
+            return { state: 'hasData', data: data };
         } catch (e) {
+            if (retrySate.count > 0) {
+                console.log('retrying...');
+                return await PromiseWrapper(...args);
+            }
+            retrySate.init = false;
             if (options.printError) console.error(e);
             if (e instanceof Error) {
                 return { state: 'hasError', error: e.message };

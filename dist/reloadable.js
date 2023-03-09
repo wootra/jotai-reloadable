@@ -70,6 +70,7 @@ function reloadable(func, initArgs, options) {
     if (initArgs === void 0) { initArgs = []; }
     if (options === void 0) { options = { forceReload: false }; }
     var statusHolder = { value: { state: 'init' } };
+    var retrySate = { count: options.retry || 0, init: false };
     var PromiseWrapper = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
@@ -80,13 +81,26 @@ function reloadable(func, initArgs, options) {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 2, , 3]);
+                        _a.trys.push([0, 2, , 5]);
+                        if (!retrySate.init) {
+                            retrySate.init = true;
+                            retrySate.count = options.retry || 0;
+                        }
+                        else {
+                            retrySate.count--;
+                        }
                         return [4 /*yield*/, func.apply(void 0, args)];
                     case 1:
                         data = _a.sent();
                         return [2 /*return*/, { state: 'hasData', data: data }];
                     case 2:
                         e_1 = _a.sent();
+                        if (!(retrySate.count > 0)) return [3 /*break*/, 4];
+                        console.log('retrying...');
+                        return [4 /*yield*/, PromiseWrapper.apply(void 0, args)];
+                    case 3: return [2 /*return*/, _a.sent()];
+                    case 4:
+                        retrySate.init = false;
                         if (options.printError)
                             console.error(e_1);
                         if (e_1 instanceof Error) {
@@ -95,8 +109,8 @@ function reloadable(func, initArgs, options) {
                         else {
                             return [2 /*return*/, { state: 'hasError', error: e_1 }];
                         }
-                        return [3 /*break*/, 3];
-                    case 3: return [2 /*return*/];
+                        return [3 /*break*/, 5];
+                    case 5: return [2 /*return*/];
                 }
             });
         });

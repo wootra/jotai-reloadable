@@ -23,7 +23,7 @@ specifiers:
 
 dependencies:
   jotai: 2.0.3_react@18.2.0
-  jotai-reloadable: file:.._jotai@2.0.3+react@18.2.0
+  jotai-reloadable: file:.._jotai@2.0.3
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
 
@@ -3141,18 +3141,13 @@ packages:
     engines: {node: '>=12.20'}
     dev: true
 
-  file:.._jotai@2.0.3+react@18.2.0:
+  file:.._jotai@2.0.3:
     resolution: {directory: .., type: directory}
     id: file:..
     name: jotai-reloadable
-    version: 1.1.1
+    version: 1.1.3
     peerDependencies:
       jotai: '>= 1.12.1 < 3'
-      react: '>=17.0.0'
-    peerDependenciesMeta:
-      react:
-        optional: true
     dependencies:
       jotai: 2.0.3_react@18.2.0
-      react: 18.2.0
     dev: false

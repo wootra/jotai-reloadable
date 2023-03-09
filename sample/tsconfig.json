@@ -28,7 +28,8 @@
         "src/*.cjs",
         "src/*.mjs",
         "src/*.jsx",
-        "src/*.test.*"
+        "src/*.test.*",
+        "src/__tests__/Basic.test.tsx"
     ],
-    "exclude": ["node_modules", "setupTests.ts"]
+    "exclude": ["node_modules", "src/__tests__/setupTests.ts"]
 }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Test from './Test';
 import TestNoArg from './TestNoArg';
 import TestJsx from './TestJsx';
+import TestNoArgWithRetry from './TestNoArgWithRetry';
 
 function App() {
     const [count, setCount] = useState(0);
@@ -13,6 +14,8 @@ function App() {
             <Test />
             TestWithNoArgs
             <TestNoArg />
+            TestWithNoArgWithRetry
+            <TestNoArgWithRetry />
             Jsx Test
             <TestJsx />
             <TestJsx />

@@ -21,6 +21,7 @@ import type { WritableAtom } from 'jotai';
 import { Loadable } from 'jotai/vanilla/utils/loadable';
 export type ReloadableInitOptions = {
     forceReload?: boolean;
+    retry?: number;
     printError?: boolean;
 };
 export type ReloadableOptions = {

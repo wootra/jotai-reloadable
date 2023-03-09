@@ -48,7 +48,7 @@ I wanted to have some simple way of re-load the async atom value. I named it as 
 
 Since this async function can get some argument, sometimes it can be given when I trigger the reload.
 
-```
+```jsx
 import {reloadable} from 'jotai-reloadable'; // instead of loadable, use reloadable from 'jotai-reloadable'
 import { atom, createStore, useAtomValue } from 'jotai';
 
@@ -74,9 +74,9 @@ const MyComponent = ()=>{
     const ret = useAtomValue(loadableAtom, {store}); // since testApi(false) will return fail value, it will be always return { state: 'hasError', error: {...}}
     return <div>
        <pre>
-       {JSON.stringify(ret)}
+        {JSON.stringify(ret)}
        </pre>
-       <button onClick=()=>{store.set(loadableAtom, [true])}>reload</button>
+       <button onClick={()=>{store.set(loadableAtom, [true])}>reload</button>
     </div>
 }
 ```
@@ -89,24 +89,35 @@ But sometimes, we need to "force" to call the service once more.
 
 Then we can pass option to force reload.
 
-```
-<button onClick=()=>{
-    store.set(loadableAtom, {
-        args:[true],
-        options: { forceReload: true }
-    })
-    }>
+```jsx
+<button
+    onClick={() => {
+        store.set(loadableAtom, {
+            args: [true],
+            options: { forceReload: true },
+        });
+    }}
+>
     reload
 </button>
 ```
 
 You also can set the reload option as a default function by adding the option when you setup the atom.
 
-```
+```jsx
 const loadableAtom = reloadable<
     { greeting: string } | { error: string },
     [boolean]
 >(testApi, [false], { forceReload: true });
+```
+
+if you want to automatically retry few times when the service is failed, you can set the retry count:
+
+```jsx
+const loadableAtom = reloadable<
+    { greeting: string } | { error: string },
+    [boolean]
+>(testApi, [false], { retry: 3 });
 ```
 
 Enjoy!

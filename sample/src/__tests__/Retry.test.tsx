@@ -7,7 +7,7 @@ import { it, describe, expect, vi, beforeEach, afterEach } from 'vitest';
 // import { Window } from 'happy-dom';
 import { render, screen, cleanup } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-import { reloadable } from '../../src/reloadable';
+import { reloadable } from '../../../src/reloadable';
 import { createStore, Provider, useAtom, useAtomValue } from 'jotai';
 
 const createServiceCall = (passCount = 3) => {
@@ -23,9 +23,9 @@ const createServiceCall = (passCount = 3) => {
     };
 };
 
-const createComponent = () => {
+const createComponent = (retry = 2) => {
     const serviceToCall = createServiceCall();
-    const reloadableAtom = reloadable(serviceToCall);
+    const reloadableAtom = reloadable(serviceToCall, [], { retry });
     const store = createStore();
 
     return function () {
@@ -54,9 +54,8 @@ const createComponent = () => {
     };
 };
 
-describe('Test', () => {
+describe('Retry', () => {
     describe('Name of the group', () => {
-        // let element: RenderResult;
         beforeEach(() => {
             vi.useFakeTimers();
         });
@@ -64,38 +63,14 @@ describe('Test', () => {
             vi.useRealTimers();
             cleanup();
         });
-        it('should render', async () => {
-            const TestPass = createComponent();
-            render(<TestPass />);
-            expect(screen.getByTestId('result')).toBeTruthy();
-        });
 
-        it('should load on first render', async () => {
-            const TestPass = createComponent();
-            render(<TestPass />);
-            let result = window.document.getElementById('result');
-            expect(result).toBeTruthy();
-            expect(result?.innerHTML).toContain('loading');
-            await act(() => vi.advanceTimersByTime(1000));
-            result = window.document.getElementById('result');
-            expect(result?.innerHTML).toContain('wrong no:1');
-        });
-
-        it('should fail on first render', async () => {
-            // render(<Timer />);
-            const TestPass = createComponent();
-            render(<TestPass />);
-            await act(() => vi.advanceTimersByTime(1000)); //fail
+        it('should pass on first render with 2 retry', async () => {
+            const TestPass = createComponent(2);
+            await act(() => render(<TestPass />));
             expect(
                 window.document.getElementById('result')?.innerHTML
-            ).toContain('wrong no:1');
-            window.document.getElementById('reload-btn')?.click();
-            await act(() => vi.advanceTimersByTime(1000)); //fail
-            expect(
-                window.document.getElementById('result')?.innerHTML
-            ).toContain('wrong no:2');
-            window.document.getElementById('reload-btn')?.click();
-            await act(() => vi.advanceTimersByTime(1000)); //fail
+            ).toContain('loading');
+            await act(() => vi.advanceTimersByTimeAsync(5000)); // with 2 retry, it will pass
             expect(
                 window.document.getElementById('result')?.innerHTML
             ).toContain(JSON.stringify({ pass: true, count: 3 }));

@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.1.4
+
+- add retry functionality
+
 ## 1.1.3
 
 - remove react from peer dependency
