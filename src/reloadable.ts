@@ -64,32 +64,8 @@ export function reloadable<T, ARGS extends any[]>(
     initArgs = [] as unknown[] as ARGS,
     options: ReloadableInitOptions = { forceReload: false }
 ): ReloadableAtom<T, ARGS> {
-    const statusHolder: { value: Reloadable<T> } = { value: { state: 'init' } };
-    const retrySate = { count: options.retry || 0, init: false };
-    const PromiseWrapper = async (...args: ARGS): Promise<Loadable<T>> => {
-        try {
-            if (!retrySate.init) {
-                retrySate.init = true;
-                retrySate.count = options.retry || 0;
-            } else {
-                retrySate.count--;
-            }
-            const data = await func(...args);
-            return { state: 'hasData', data: data };
-        } catch (e) {
-            if (retrySate.count > 0) {
-                console.log('retrying...');
-                return await PromiseWrapper(...args);
-            }
-            retrySate.init = false;
-            if (options.printError) console.error(e);
-            if (e instanceof Error) {
-                return { state: 'hasError', error: e.message };
-            } else {
-                return { state: 'hasError', error: e };
-            }
-        }
-    };
+    const { statusHolder, PromiseWrapper } = buildInitStates(options, func);
+
     const reloadablePromiseAtom = atom(PromiseWrapper(...initArgs));
     reloadablePromiseAtom.debugLabel = 'reloadable__reloadablePromiseAtom';
     const resetAtom = atom(0);
@@ -147,6 +123,38 @@ export function reloadable<T, ARGS extends any[]>(
     );
     reloadableAtom.debugLabel = 'reloadable__reloadableAtom';
     return reloadableAtom as unknown as ReloadableAtom<T, ARGS>;
+}
+
+function buildInitStates<T, ARGS extends any[]>(
+    options: ReloadableInitOptions,
+    func: (...args: ARGS) => Promise<T>
+) {
+    const statusHolder: { value: Reloadable<T> } = { value: { state: 'init' } };
+    const retrySate = { count: options.retry || 0, init: false };
+    const PromiseWrapper = async (...args: ARGS): Promise<Loadable<T>> => {
+        try {
+            if (!retrySate.init) {
+                retrySate.init = true;
+                retrySate.count = options.retry || 0;
+            } else {
+                retrySate.count--;
+            }
+            const data = await func(...args);
+            return { state: 'hasData', data: data };
+        } catch (e) {
+            if (retrySate.count > 0) {
+                return await PromiseWrapper(...args);
+            }
+            retrySate.init = false;
+            if (options.printError) console.error(e);
+            if (e instanceof Error) {
+                return { state: 'hasError', error: e.message };
+            } else {
+                return { state: 'hasError', error: e };
+            }
+        }
+    };
+    return { statusHolder, PromiseWrapper };
 }
 
 function getCurrentValue<ARGS>(

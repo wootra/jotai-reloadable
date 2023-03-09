@@ -66,55 +66,9 @@ var SELF_RELOAD = '--self-reload--';
  * @returns
  */
 function reloadable(func, initArgs, options) {
-    var _this = this;
     if (initArgs === void 0) { initArgs = []; }
     if (options === void 0) { options = { forceReload: false }; }
-    var statusHolder = { value: { state: 'init' } };
-    var retrySate = { count: options.retry || 0, init: false };
-    var PromiseWrapper = function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        return __awaiter(_this, void 0, void 0, function () {
-            var data, e_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 2, , 5]);
-                        if (!retrySate.init) {
-                            retrySate.init = true;
-                            retrySate.count = options.retry || 0;
-                        }
-                        else {
-                            retrySate.count--;
-                        }
-                        return [4 /*yield*/, func.apply(void 0, args)];
-                    case 1:
-                        data = _a.sent();
-                        return [2 /*return*/, { state: 'hasData', data: data }];
-                    case 2:
-                        e_1 = _a.sent();
-                        if (!(retrySate.count > 0)) return [3 /*break*/, 4];
-                        console.log('retrying...');
-                        return [4 /*yield*/, PromiseWrapper.apply(void 0, args)];
-                    case 3: return [2 /*return*/, _a.sent()];
-                    case 4:
-                        retrySate.init = false;
-                        if (options.printError)
-                            console.error(e_1);
-                        if (e_1 instanceof Error) {
-                            return [2 /*return*/, { state: 'hasError', error: e_1.message }];
-                        }
-                        else {
-                            return [2 /*return*/, { state: 'hasError', error: e_1 }];
-                        }
-                        return [3 /*break*/, 5];
-                    case 5: return [2 /*return*/];
-                }
-            });
-        });
-    };
+    var _a = buildInitStates(options, func), statusHolder = _a.statusHolder, PromiseWrapper = _a.PromiseWrapper;
     var reloadablePromiseAtom = (0, jotai_1.atom)(PromiseWrapper.apply(void 0, initArgs));
     reloadablePromiseAtom.debugLabel = 'reloadable__reloadablePromiseAtom';
     var resetAtom = (0, jotai_1.atom)(0);
@@ -164,6 +118,55 @@ function reloadable(func, initArgs, options) {
     return reloadableAtom;
 }
 exports.reloadable = reloadable;
+function buildInitStates(options, func) {
+    var _this = this;
+    var statusHolder = { value: { state: 'init' } };
+    var retrySate = { count: options.retry || 0, init: false };
+    var PromiseWrapper = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        return __awaiter(_this, void 0, void 0, function () {
+            var data, e_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 5]);
+                        if (!retrySate.init) {
+                            retrySate.init = true;
+                            retrySate.count = options.retry || 0;
+                        }
+                        else {
+                            retrySate.count--;
+                        }
+                        return [4 /*yield*/, func.apply(void 0, args)];
+                    case 1:
+                        data = _a.sent();
+                        return [2 /*return*/, { state: 'hasData', data: data }];
+                    case 2:
+                        e_1 = _a.sent();
+                        if (!(retrySate.count > 0)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, PromiseWrapper.apply(void 0, args)];
+                    case 3: return [2 /*return*/, _a.sent()];
+                    case 4:
+                        retrySate.init = false;
+                        if (options.printError)
+                            console.error(e_1);
+                        if (e_1 instanceof Error) {
+                            return [2 /*return*/, { state: 'hasError', error: e_1.message }];
+                        }
+                        else {
+                            return [2 /*return*/, { state: 'hasError', error: e_1 }];
+                        }
+                        return [3 /*break*/, 5];
+                    case 5: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    return { statusHolder: statusHolder, PromiseWrapper: PromiseWrapper };
+}
 function getCurrentValue(action, initArgs, options) {
     if (Array.isArray(action)) {
         return [action, options];
