@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.2.3
+
+- add simpleReloadable
+- add pipeline
+
 ## 1.2.0
 
 - add retry functionality

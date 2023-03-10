@@ -9,6 +9,7 @@ you can still use it in jotai-v1, but typescript has bug in the jotai v1 core, s
 
 when you don't want to reload jotai loadable object multiple times and the case is limited,
 using a pure jotai / loadable object could be the best practice. (<https://github.com/pmndrs/jotai/discussions/1822>)
+If you're a slave of the lazyness, you might want to use simpleReloadable that is almost identical of the simple code.
 
 ```jsx
 const fetchFunc = ...
@@ -24,9 +25,22 @@ const finalAtom = atom(
 )
 ```
 
+```jsx
+import {simpleReloadable as reloadable} from 'jotai-reloadable';
+const fetchFunc = ...
+const reloadableAtom = reloadable(fetchFunc);
+...
+//assume you already have a store
+store.set(reloadableAtom); // retry when it failed before. if succeeded before, does not reload
+store.set(reloadableAtom, fetchFunc); // same meaning of above line. when the function reference is the same, does not retry.
+store.set(reloadableAtom, ()=>fetchFunc()); // retry the service call no matter what. simpleReloadable check the reference to know if this function is a new function or not.
+```
+
+below is more advanced usage, but I believe simpleReloadable will work for most of times.
+
 ## Motivation
 
-loadable in jotai library is not re-loadable. I wanted to make it run again, but didn't have much luck
+loadable in jotai library is not re-loadable. I wanted to make it run again, but didn't have much luck except for the way of making multiple atoms manually.
 
 ```jsx
 import { loadable } from 'jotai/utils';
@@ -46,53 +60,53 @@ const testApi = async (pass: boolean) => {
     });
 };
 
-const loadableAtom = loadable(atom(testApi(false)));
-// how can I reload loadableAtom ??
+const baseAtom = atom(testApi(false)); // create an atom that holds a promise. in this example, this testApi will return rejected Promise
+const loadableAtom = loadable(baseAtom); // this atom will hold Loadable object and return it when promise changes the state.
+const finalAtom = atom(
+  (get) => get(loadableAtom),
+  (get, set) => {
+    if (get(loadableAtom).state === 'hasError') { // this block will allow to retry of loadableAtom when the service call fails.
+      set(baseAtom, testApi(true)); // in this example, testApi will pass when button is clicked.
+    }
+  }
+); // with this atom, we can control baseAtom as well as getting current Loadable item from loadableAtom.
+// while it is possible to get Loadable directly from lodableAtom, it is easier to have derieved atom with write ability.
 
 const store = createStore();
 
 const MyComponent = () => {
     const ret = useAtomValue(loadableAtom, { store }); // since testApi(false) will return fail value, it will be always return { state: 'hasError', error: {...}}
-    return <pre>{JSON.stringify(ret)}</pre>;
+    return (<div>
+        <pre>{JSON.stringify(ret)}</pre>
+        <button onClick={()=>store.set(finalAtom)}>reload</button>
+    </div>);
+    // when reload button is clicked, the service call will be called again until the service passes.
 };
 ```
 
-But sometimes testApi is just unstable. So if this component is reloaded, or if some action is give, I want to reload the value from testApi.
-But seems like there is no easy way without manually setup the atom not using loadable util.
+Sometimes testApi is just unstable. So if this component is reloaded, or if some action is given(i.e. button click or component reload), I want to reload the value from testApi. In above example, we can do it.
+But wouldn't it be better to have 'reloadable' util like 'loadable' util, so we don't need to create multiple atoms?
 
-I wanted to have some simple way of re-load the async atom value. I named it as jotai-reloadable.
-
-Since this async function can get some argument, sometimes it can be given when I trigger the reload.
+Here is a simple way to reload the api call.
 
 ```jsx
 import {reloadable} from 'jotai-reloadable'; // instead of loadable, use reloadable from 'jotai-reloadable'
 import { atom, createStore, useAtomValue } from 'jotai';
 
 const countVal = { count: 0 }; // to check if the service call is duplicated.
-const testApi = async (pass: boolean) => {
-    return new Promise((res, rej) => {
-        setTimeout(() => {
-            countVal.count++;
-            if (pass) {
-                res({ greeting: 'hello', countVal });
-            } else {
-                rej({ error: 'failed', countVal });
-            }
-        }, 1000);
-    });
-};
+const testApi = async (pass: boolean) => {...};
 
 const loadableAtom = reloadable(testApi, [false]); // instead of using loadable, use reloadable and pass async function and its initial argument(optional)
 
 const store = createStore();
 
-const MyComponent = ()=>{
+const MyComponent = ()=> {
     const ret = useAtomValue(loadableAtom, {store}); // since testApi(false) will return fail value, it will be always return { state: 'hasError', error: {...}}
     return <div>
        <pre>
         {JSON.stringify(ret)}
        </pre>
-       <button onClick={()=>{store.set(loadableAtom, [true])}>reload</button>
+       <button onClick={()=>{store.set(loadableAtom, [true])}}>reload</button>
     </div>
 }
 ```
@@ -121,19 +135,15 @@ Then we can pass option to force reload.
 You also can set the reload option as a default function by adding the option when you setup the atom.
 
 ```jsx
-const loadableAtom = reloadable<
-    { greeting: string } | { error: string },
-    [boolean]
->(testApi, [false], { forceReload: true });
+type ReturnValue = { greeting: string } | { error: string };
+type Arguments = [boolean];
+const loadableAtom = reloadable<ReturnValue,Arguments>(testApi, [false], { forceReload: true });
 ```
 
 if you want to automatically retry few times when the service is failed, you can set the retry count:
 
 ```jsx
-const loadableAtom = reloadable<
-    { greeting: string } | { error: string },
-    [boolean]
->(testApi, [false], { retry: 3 });
+const loadableAtom = reloadable<ReturnValue,Arguments>(testApi, [false], { retry: 3 });
 ```
 
 Enjoy!
@@ -152,13 +162,15 @@ npm i jotai@2
 
 ```js
 import { reloadable } from 'jotai-reloadable'; // instead of loadable, use reloadable from 'jotai-reloadable'
+// if you want to use simple version of reloadable
+// import {simpleReloadable as reloadable } from 'jotai-reloadable';
 import { atom, createStore, useAtomValue } from 'jotai';
 const myStore = createStore();
 ```
 
 ### define reloadable atom
 
-```js
+```jsx
 const valObj = { count: 0 };
 const asyncFunc = (arg1: number, arg2: number) => {
     valObj.count++; // starting from 1
@@ -173,7 +185,9 @@ const asyncFunc = (arg1: number, arg2: number) => {
     });
 };
 const reloadableAtom = reloadable(asyncFund, [1, 2]); // it will call asyncFunc(1,2) when reloadableAtom is created.
-const derivedAtom = atom(get => {
+// for simpleReloadable, it will look like this (simpleReloadable does not receive arguments):
+// const reloadableAtom = reloadable(async ()=> await asyncFunc(1,2));
+const derivedAtom = atom((get)=>{
     // the same way of loadable(atom(asyncFunc()))
     const ret = get(reloadableAtom);
     if (ret.state === 'hasData') {
@@ -189,7 +203,7 @@ const derivedAtom = atom(get => {
 
 ### use atom in your component
 
-```js
+```jsx
 export const MyComponent = () => {
     const val = useAtomValue(derivedAtom, { store: myStore });
     return <div>return value: {!!val && val.value}</div>;
@@ -198,12 +212,13 @@ export const MyComponent = () => {
 
 ### refresh as needed
 
-```js
+```jsx
 export const MyComponent = () => {
     return (
         <button
             onClick={() => {
-                myStore.set(reloadableAtom, [1, 2]);
+                myStore.set(reloadableAtom);
+                // just retry without argument. once passes, does not do anything. (same in simpleReloadable)
             }}
         >
             Reload
@@ -223,6 +238,8 @@ export const MyComponent = () => {
                     args: [1, 2],
                     forceReload: true,
                 });
+                // for simpleReloadable, you should pass a new function reference to force reload
+                // myStore.set(reloadableAtom, async ()=>await asyncFunc(1,2))
             }}
         >
             Reload(force)
@@ -233,9 +250,9 @@ export const MyComponent = () => {
 
 ## Troubleshoot
 
-#### if you are using jotai@1.X.X version
+### if you are using jotai@1.X.X version
 
--   typescript shows wrong error for the arguments of set. Ignore it then it will still work.
+- typescript shows wrong error for the arguments of set. Ignore it then it will still work.
 
 ```js
 export const MyComponent = () => {
@@ -268,6 +285,6 @@ export const MyComponent = () => {
 };
 ```
 
-#### if you're using jotai@1.13.x version
+### if you're using jotai@1.13.x version
 
 when you import jotai, you should import useAtomValue and useSetAtom from 'jotai/react' instead of 'jotai'.
