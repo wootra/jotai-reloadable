@@ -5,12 +5,31 @@
 this library is tested in jotai-v2. jotai-v1 has an issue that fails.
 you can still use it in jotai-v1, but typescript has bug in the jotai v1 core, so you should use jsx or // @ts-ignore in the tsx file
 
+## disclaimer
+
+when you don't want to reload jotai loadable object multiple times and the case is limited,
+using a pure jotai / loadable object could be the best practice. (<https://github.com/pmndrs/jotai/discussions/1822>)
+
+```jsx
+const fetchFunc = ...
+const baseAtom = atom(fetchFunc())
+const loadableAtom = loadable(baseAtom)
+const finalAtom = atom(
+  (get) => get(loadableAtom),
+  (get, set) => {
+    if (get(loadableAtom).state === 'hasError') {
+      set(baseAtom, fetchFunc())
+    }
+  }
+)
+```
+
 ## Motivation
 
 loadable in jotai library is not re-loadable. I wanted to make it run again, but didn't have much luck
 
-```
-import {loadable} from 'jotai/utils';
+```jsx
+import { loadable } from 'jotai/utils';
 import { atom, createStore, useAtomValue } from 'jotai';
 
 const countVal = { count: 0 };
@@ -27,18 +46,15 @@ const testApi = async (pass: boolean) => {
     });
 };
 
-const loadableAtom = loadable(atom(testApi(false)))
+const loadableAtom = loadable(atom(testApi(false)));
 // how can I reload loadableAtom ??
 
 const store = createStore();
 
-const MyComponent = ()=>{
-    const ret = useAtomValue(loadableAtom, {store}); // since testApi(false) will return fail value, it will be always return { state: 'hasError', error: {...}}
-    return <pre>
-       {JSON.stringify(ret)}
-    </pre>
-}
-
+const MyComponent = () => {
+    const ret = useAtomValue(loadableAtom, { store }); // since testApi(false) will return fail value, it will be always return { state: 'hasError', error: {...}}
+    return <pre>{JSON.stringify(ret)}</pre>;
+};
 ```
 
 But sometimes testApi is just unstable. So if this component is reloaded, or if some action is give, I want to reload the value from testApi.
