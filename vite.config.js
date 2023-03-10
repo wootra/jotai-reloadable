@@ -16,9 +16,9 @@ export default defineConfig({
         rollupOptions: {
             external: [
                 {
-                    jotai: '/node_modules/jotai/esm/index.mjs',
+                    jotai: '/sample/v2/node_modules/jotai/esm/index.mjs',
                     'jotai/vanilla/utils/loadable':
-                        '/node_modules/jotai/esm/vanilla/utils.mjs',
+                        '/sample/v2/node_modules/jotai/esm/vanilla/utils.mjs',
                 },
             ],
             output: {

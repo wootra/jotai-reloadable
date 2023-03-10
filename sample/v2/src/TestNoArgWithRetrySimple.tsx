@@ -1,6 +1,6 @@
 import React from 'react';
 import { createStore, useAtomValue } from 'jotai';
-import { reloadable } from '../../src/reloadable';
+import { simpleReloadable as reloadable } from 'jotai-reloadable';
 
 const store = createStore();
 const countVal = { count: 0 };
@@ -20,7 +20,7 @@ const testApi = async (): Promise<
     });
 };
 
-const testLoadableAtom = reloadable(testApi, [], { retry: 2 });
+const testLoadableAtom = reloadable(testApi);
 
 const Reload = () => {
     return (
@@ -39,10 +39,8 @@ const ReloadForce = () => {
         <button
             type='button'
             className='rounded-md bg-blue-600 text-white'
-            onClick={e =>
-                store.set(testLoadableAtom, {
-                    options: { forceReload: true },
-                })
+            onClick={
+                e => store.set(testLoadableAtom, () => testApi()) // creating new refererence of the function
             }
         >
             Reload(pass) Forced

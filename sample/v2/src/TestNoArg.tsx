@@ -1,6 +1,6 @@
 import React from 'react';
 import { createStore, useAtomValue } from 'jotai';
-import { reloadable } from '../../src/reloadable';
+import { reloadable } from 'jotai-reloadable';
 
 const store = createStore();
 const countVal = { count: 0 };

@@ -3,12 +3,14 @@
     "version": "1.3.0",
     "description": "this allows jotai/utils/loadable reloadable. you should install jotai to use this module. ",
     "scripts": {
-        "test1": "cd sample; pnpm run test --run",
-        "test2": "cd sampleJotaiV1; pnpm run test --run",
-        "test": "vitest",
-        "clear1": "cd $CURRPATH/sample; pnpm rm jotai-reloadable; pnpm i jotai-reloadable@file:..",
-        "clear2": "cd $CURRPATH/sampleJotaiV1; pnpm rm jotai-reloadable; pnpm i jotai-reloadable@file:..",
-        "build-all": "rm -rf ./dist; pnpm run build; CURRPATH=$(pwd) pnpm run clear1 ; CURRPATH=$(pwd) pnpm run clear2",
+        "sample-test": "cd $CURRPATH; yarn run test --run",
+        "test": "CURRPATH=$(pwd)/sample/v2 yarn run sample-test;CURRPATH=$(pwd)/sample/v1.12.1 yarn run sample-test",
+        "clear": "cd $CURRPATH; pnpm rm jotai-reloadable; pnpm i jotai-reloadable@file:..",
+        "build-all": "rm -rf ./dist; yarn run build; CURRPATH=$(pwd)/sample/v1.12.1 yarn run clear ; CURRPATH=$(pwd)/sample/v2 yarn run clear",
+        "ci:m:server": "echo 'installing on $CURRPATH'; cd $CURRPATH; yarn install --immutable --immutable-cache --check-cache",
+        "ci:m:local": "echo 'installing on $CURRPATH'; cd $CURRPATH; pnpm i",
+        "ci:local": "CURRPATH=. pnpm run ci:m:local;CURRPATH=$(pwd)/sample/v2 pnpm run ci:m:local;CURRPATH=$(pwd)/sample/v1.12.1 pnpm run ci:m:local",
+        "ci:server": "CURRPATH=. yarn run ci:m:server;CURRPATH=$(pwd)/sample/v2 yarn run ci:m:server;CURRPATH=$(pwd)/sample/v1.12.1 yarn run ci:m:server",
         "build": "tsc && vite build"
     },
     "main": "./dist/index.js",
@@ -45,21 +47,17 @@
     },
     "devDependencies": {
         "@rollup/plugin-typescript": "^11.0.0",
-        "@testing-library/react": "^14.0.0",
-        "@testing-library/user-event": "^14.4.3",
         "@types/node": "^18.15.0",
         "@types/react": "^18.0.28",
         "@types/react-dom": "^18.0.10",
         "@vitejs/plugin-react": "^3.1.0",
-        "happy-dom": "^8.9.0",
         "jotai": "^2.0.3",
-        "jotai-reloadable": "file:.",
         "react": "^18.2.0",
-        "react-dom": "^18.2.0",
+        "typescript": "^4.9.5"
+    },
+    "dependencies": {
         "rollup-plugin-typescript-paths": "^1.4.0",
         "tslib": "^2.5.0",
-        "typescript": "^4.9.5",
-        "vite": "^4.1.4",
-        "vitest": "^0.29.2"
+        "vite": "^4.1.4"
     }
 }

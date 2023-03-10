@@ -2,7 +2,7 @@
     "compilerOptions": {
         "target": "esnext",
         "lib": ["esnext", "dom", "dom.iterable"],
-        "types": ["vite/client", "node"],
+        "types": ["node"],
         "allowJs": false,
         "skipLibCheck": true,
         "esModuleInterop": false,
@@ -22,5 +22,5 @@
         }
     },
     "include": ["./src"],
-    "exclude": ["./node_modules", "./sample", "./sampleJotaiV1", "./dist"]
+    "exclude": ["./node_modules", "./sample", "./dist"]
 }

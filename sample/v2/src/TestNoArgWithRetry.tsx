@@ -1,19 +1,17 @@
 import React from 'react';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { createStore, useAtomValue } from 'jotai';
 import { reloadable } from 'jotai-reloadable';
 
+const store = createStore();
 const countVal = { count: 0 };
-
-/**
- *
- * @param {boolean} pass
- * @returns {Promise<{greeting: string, countVal: {count: number}}>}
- */
-const testApi = async pass => {
+const testApi = async (): Promise<
+    | { greeting: string; countVal: { count: number } }
+    | { error: string; countVal: { count: number } }
+> => {
     return new Promise((res, rej) => {
         setTimeout(() => {
             countVal.count++;
-            if (pass) {
+            if (countVal.count % 3 === 0) {
                 res({ greeting: 'hello', countVal });
             } else {
                 rej({ error: 'failed', countVal });
@@ -22,61 +20,38 @@ const testApi = async pass => {
     });
 };
 
-const testLoadableAtom = reloadable(testApi, [false]);
-testLoadableAtom.debugLabel = 'testLoadableAtom';
+const testLoadableAtom = reloadable(testApi, [], { retry: 2 });
 
-const LoadPassWrong = () => {
-    const refresh = useSetAtom(testLoadableAtom);
+const Reload = () => {
     return (
         <button
             type='button'
             className='rounded-md bg-blue-600 text-white'
-            onClick={e => refresh(true)}
+            onClick={e => store.set(testLoadableAtom)}
         >
-            Reload(pass) Wrong Type
+            Reload
         </button>
     );
 };
 
-const LoadPass = () => {
-    const refresh = useSetAtom(testLoadableAtom);
+const ReloadForce = () => {
     return (
         <button
             type='button'
             className='rounded-md bg-blue-600 text-white'
-            onClick={e => refresh([true])}
+            onClick={e =>
+                store.set(testLoadableAtom, {
+                    options: { forceReload: true },
+                })
+            }
         >
-            Reload(pass)
-        </button>
-    );
-};
-
-const LoadFailWrong = () => {
-    const refresh = useSetAtom(testLoadableAtom);
-    return (
-        <button
-            className='rounded-md bg-blue-600 text-white'
-            onClick={e => refresh(false)}
-        >
-            Reload(fail) Wrong Type
-        </button>
-    );
-};
-
-const LoadFail = () => {
-    const refresh = useSetAtom(testLoadableAtom);
-    return (
-        <button
-            className='rounded-md bg-blue-600 text-white'
-            onClick={e => refresh([false])}
-        >
-            Reload(fail)
+            Reload(pass) Forced
         </button>
     );
 };
 
 const TestData = () => {
-    const ret = useAtomValue(testLoadableAtom);
+    const ret = useAtomValue(testLoadableAtom, { store: store });
     return (
         <div className='flex h-full flex-1 flex-col gap-4 rounded-md'>
             <div className='h-auto flex-1 rounded-md bg-white'>
@@ -91,18 +66,16 @@ const TestData = () => {
     );
 };
 
-const Test = () => {
+const TestNoArgWithRetry = () => {
     return (
         <div className='flex h-96 w-[600px] flex-row gap-4 border border-gray-400 bg-slate-200 p-4'>
             <TestData />
             <div className='flex w-32 flex-col justify-center gap-4'>
-                <LoadPassWrong />
-                <LoadPass />
-                <LoadFailWrong />
-                <LoadFail />
+                <Reload />
+                <ReloadForce />
             </div>
         </div>
     );
 };
 
-export default Test;
+export default TestNoArgWithRetry;

@@ -1,1 +1,0 @@
-"use strict";Object.defineProperty(exports,Symbol.toStringTag,{value:"Module"});const i=require("./index4.js"),b=require("./index5.js");function s(o){const a=i.atom(o()),l=b.loadable(a);return i.atom(e=>e(l),(e,r,t=o)=>{(t!==o||e(l).state==="hasError")&&r(a,t())})}exports.reloadable=s;
