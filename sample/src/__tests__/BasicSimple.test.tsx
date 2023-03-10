@@ -7,12 +7,14 @@ import { it, describe, expect, vi, beforeEach, afterEach } from 'vitest';
 // import { Window } from 'happy-dom';
 import { render, screen, cleanup } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-import { reloadable } from '../../../src/index';
+import { simpleReloadable as reloadable } from 'jotai-reloadable';
 import { createStore, Provider, useAtom, useAtomValue } from 'jotai';
+
+type ServiceReturn = { pass: true; count: number };
 
 const createServiceCall = (passCount = 3) => {
     let count = 0;
-    return vi.fn(() => {
+    return vi.fn((): Promise<ServiceReturn> => {
         return new Promise((res, rej) => {
             setTimeout(() => {
                 count++;
@@ -25,7 +27,7 @@ const createServiceCall = (passCount = 3) => {
 
 const createComponent = () => {
     const serviceToCall = createServiceCall();
-    const reloadableAtom = reloadable(serviceToCall);
+    const reloadableAtom = reloadable<ServiceReturn>(serviceToCall);
     const store = createStore();
 
     return function () {
