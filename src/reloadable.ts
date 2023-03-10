@@ -18,7 +18,7 @@
  *
  */
 
-import type { WritableAtom } from 'jotai';
+import type { Getter, Setter, WritableAtom } from 'jotai';
 import { atom } from 'jotai';
 import { Loadable } from 'jotai/vanilla/utils/loadable';
 
@@ -73,7 +73,7 @@ export function reloadable<T, ARGS extends any[]>(
     const selfReloadOption = SELF_RELOAD;
 
     const reloadableAtom = atom(
-        (get, { setSelf }) => {
+        (get: Getter, { setSelf }) => {
             const data = statusHolder.value;
             const promise = get(reloadablePromiseAtom);
             get(resetAtom); // just for reset
@@ -93,8 +93,8 @@ export function reloadable<T, ARGS extends any[]>(
             return statusHolder.value as Loadable<T>;
         },
         (
-            get,
-            set,
+            get: Getter,
+            set: Setter,
             action: ARGS | ArgsWithOptions<ARGS> | SelfReloadOption | undefined
         ) => {
             if (action === SELF_RELOAD) {

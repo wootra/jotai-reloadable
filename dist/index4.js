@@ -1,0 +1,1 @@
+"use strict";Object.defineProperty(exports,Symbol.toStringTag,{value:"Module"});let u=0;function r(o,i){const f=`atom${++u}`,t={toString:()=>f};return typeof o=="function"?t.read=o:(t.init=o,t.read=e=>e(t),t.write=(e,c,n)=>c(t,typeof n=="function"?n(e(t)):n)),i&&(t.write=i),t}exports.atom=r;

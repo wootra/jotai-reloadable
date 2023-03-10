@@ -1,17 +1,26 @@
 {
     "compilerOptions": {
-        "target": "es5",
-        "lib": ["es2015", "dom"],
-        "module": "commonjs",
+        "target": "esnext",
+        "lib": ["esnext", "dom", "dom.iterable"],
+        "types": ["vite/client", "node"],
+        "allowJs": false,
+        "skipLibCheck": true,
+        "esModuleInterop": false,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "module": "esnext",
+        "moduleResolution": "node",
+        "isolatedModules": true,
+        "noEmit": true,
+        "baseUrl": ".",
         "declaration": true,
         "outDir": "dist",
-        "strict": true
+        "strict": true,
+        "paths": {
+            "jotai-reloadable": ["./src/reloadable.ts"],
+            "jotai-reloadable/simple": ["src/simple/index.ts"]
+        }
     },
-    "include": ["./src/**/*"],
-    "exclude": [
-        "./node_modules/**/*",
-        "./sample/**/*",
-        "./sampleJotaiV1/**/*",
-        "./dist/**/*"
-    ]
+    "include": ["./src"],
+    "exclude": ["./node_modules", "./sample", "./sampleJotaiV1", "./dist"]
 }
