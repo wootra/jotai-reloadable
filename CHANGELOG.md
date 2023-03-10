@@ -1,6 +1,6 @@
 # Change Log
 
-## 1.2.3
+## 1.3.0
 
 - add simpleReloadable
 - add pipeline
