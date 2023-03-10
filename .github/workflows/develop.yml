@@ -24,6 +24,7 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
-            - run: pnpm i
-            - run: pnpm build
-            - run: pnpm test
+                  cache: 'yarn'
+            - run: yarn install --immutable --immutable-cache --check-cache
+            - run: yarn build
+            - run: yarn test
