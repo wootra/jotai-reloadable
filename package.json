@@ -8,8 +8,8 @@
         "test": "vitest",
         "clear1": "cd $CURRPATH/sample; pnpm rm jotai-reloadable; pnpm i jotai-reloadable@file:..",
         "clear2": "cd $CURRPATH/sampleJotaiV1; pnpm rm jotai-reloadable; pnpm i jotai-reloadable@file:..",
-        "build": "rm -rf ./dist; pnpm run build-only; CURRPATH=$(pwd) pnpm run clear1 ; CURRPATH=$(pwd) pnpm run clear2",
-        "build-only": "tsc && vite build"
+        "build-all": "rm -rf ./dist; pnpm run build; CURRPATH=$(pwd) pnpm run clear1 ; CURRPATH=$(pwd) pnpm run clear2",
+        "build": "tsc && vite build"
     },
     "main": "./dist/index.js",
     "module": "./dist/index.mjs",
