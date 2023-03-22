@@ -30,7 +30,9 @@ export default defineConfig({
             ],
             output: {
                 preserveModules: true,
+                // preserveModulesRoot: 'dist',
                 // preserveModulesRoot: 'src',
+
                 dir: 'dist',
                 // format: 'es',
                 sourcemap: false,

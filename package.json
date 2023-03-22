@@ -1,6 +1,6 @@
 {
     "name": "jotai-reloadable",
-    "version": "1.4.1",
+    "version": "1.4.2",
     "description": "this allows jotai/utils/loadable reloadable. you should install jotai to use this module. ",
     "scripts": {
         "sample-test": "yarn run build;cd $CURRPATH; yarn install; yarn run test --run",
@@ -15,13 +15,17 @@
         "ci:m:local": "echo 'installing on $CURRPATH'; cd $CURRPATH; pnpm i",
         "ci:local": "CURRPATH=${pwd} pnpm run ci:m:local;CURRPATH=$(pwd)/sample/v2 pnpm run ci:m:local",
         "ci:server": "CURRPATH=${pwd} yarn run ci:m:server;CURRPATH=$(pwd)/sample/v2 yarn run ci:m:server",
-        "build": "yarn install && tsc && vite build"
+        "build": "yarn install && tsc && vite build",
+        "publish": "yarn run build;cp ./package.json ./README.md ./LICENSE ./CHANGELOG.md ./dist; cd ./dist;npm publish --access public"
     },
-    "main": "./dist/index.js",
-    "module": "./dist/index.mjs",
-    "typings": "./dist/index.d.ts",
+    "main": "./index.js",
+    "module": "./index.mjs",
+    "typings": "./index.d.ts",
     "files": [
-        "dist"
+        ".",
+        "README",
+        "CHANGELOG",
+        "LICENSE"
     ],
     "repository": {
         "type": "git",
@@ -29,29 +33,29 @@
     },
     "exports": {
         ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.mjs",
-            "require": "./dist/index.js"
+            "types": "./index.d.ts",
+            "import": "./index.mjs",
+            "require": "./index.js"
         },
         "./reloadable": {
-            "types": "./dist/reloadable.d.ts",
-            "import": "./dist/index2.mjs",
-            "require": "./dist/index2.js"
+            "types": "./reloadable.d.ts",
+            "import": "./index2.mjs",
+            "require": "./index2.js"
         },
         "./simple": {
-            "types": "./dist/simple.d.ts",
-            "import": "./dist/index3.mjs",
-            "require": "./dist/index3.js"
+            "types": "./simple.d.ts",
+            "import": "./index3.mjs",
+            "require": "./index3.js"
         },
         "./cancelable": {
-            "types": "./dist/cancelable.d.ts",
-            "import": "./dist/index4.mjs",
-            "require": "./dist/index4.js"
+            "types": "./cancelable.d.ts",
+            "import": "./index4.mjs",
+            "require": "./index4.js"
         },
         "./types": {
-            "types": "./dist/types.d.ts",
-            "import": "./dist/index5.mjs",
-            "require": "./dist/index5.js"
+            "types": "./types.d.ts",
+            "import": "./index5.mjs",
+            "require": "./index5.js"
         }
     },
     "keywords": [
@@ -70,12 +74,14 @@
         "jotai": ">= 1.12.1 < 3"
     },
     "devDependencies": {
+        "@npmcli/arborist": "^6.2.5",
         "@rollup/plugin-typescript": "^11.0.0",
         "@types/node": "^18.15.0",
         "@types/react": "^18.0.28",
         "@types/react-dom": "^18.0.10",
         "@vitejs/plugin-react": "^3.1.0",
         "jotai": "1.12.1",
+        "npm-packlist": "^7.0.4",
         "react": "^18.2.0",
         "rollup-plugin-peer-deps-external": "^2.2.4",
         "typescript": "^5.0.2"
