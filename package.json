@@ -1,6 +1,6 @@
 {
     "name": "jotai-reloadable",
-    "version": "1.4.6",
+    "version": "1.4.7",
     "description": "this allows jotai/utils/loadable reloadable. you should install jotai to use this module. ",
     "scripts": {
         "sample-test": "yarn run build;cd $CURRPATH; yarn install; yarn run test --run",
