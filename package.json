@@ -15,7 +15,7 @@
         "ci:m:local": "echo 'installing on $CURRPATH'; cd $CURRPATH; pnpm i",
         "ci:local": "CURRPATH=. pnpm run ci:m:local;CURRPATH=$(pwd)/sample/v2 pnpm run ci:m:local",
         "ci:server": "CURRPATH=. yarn run ci:m:server;CURRPATH=$(pwd)/sample/v2 yarn run ci:m:server",
-        "build": "tsc && vite build && cp ./package_file_backup/package.json ./dist"
+        "build": "tsc && vite build"
     },
     "main": "./dist/index.js",
     "module": "./dist/index.mjs",
