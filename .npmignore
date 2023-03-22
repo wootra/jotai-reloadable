@@ -7,4 +7,3 @@ setupTests.ts
 tsconfig.json
 vite.config.js
 vitest.config.ts
-package/**/*.*

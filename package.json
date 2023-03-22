@@ -21,7 +21,7 @@
     "module": "./dist/index.mjs",
     "typings": "./dist/index.d.ts",
     "files": [
-        ".",
+        "dist",
         "README",
         "CHANGELOG",
         "LICENSE"
