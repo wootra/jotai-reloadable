@@ -1,11 +1,8 @@
 import React from 'react';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { createStore, useAtomValue } from 'jotai';
 import { reloadable } from 'jotai-reloadable';
 
-/**
- * jotai v1 has typescript bug. should add @ts-ignore or use jsx.
- */
-
+const store = createStore();
 const countVal = { count: 0 };
 const testApi = async (): Promise<
     | { greeting: string; countVal: { count: number } }
@@ -24,15 +21,14 @@ const testApi = async (): Promise<
 };
 
 const testLoadableAtom = reloadable(testApi);
+testLoadableAtom.setRetryCount(1);
 
 const Reload = () => {
-    const refresh = useSetAtom(testLoadableAtom);
     return (
         <button
             type='button'
             className='rounded-md bg-blue-600 text-white'
-            // @ts-ignore
-            onClick={e => refresh()}
+            onClick={e => store.set(testLoadableAtom)}
         >
             Reload
         </button>
@@ -40,17 +36,11 @@ const Reload = () => {
 };
 
 const ReloadForce = () => {
-    const refresh = useSetAtom(testLoadableAtom);
     return (
         <button
             type='button'
             className='rounded-md bg-blue-600 text-white'
-            onClick={e =>
-                refresh({
-                    // @ts-ignore
-                    options: { forceReload: true },
-                })
-            }
+            onClick={e => store.set(testLoadableAtom)}
         >
             Reload(pass) Forced
         </button>
@@ -58,10 +48,12 @@ const ReloadForce = () => {
 };
 
 const TestData = () => {
-    const ret = useAtomValue(testLoadableAtom);
+    const countRef = React.useRef(0);
+    const ret = useAtomValue(testLoadableAtom, { store: store });
     return (
         <div className='flex h-full flex-1 flex-col gap-4 rounded-md'>
             <div className='h-auto flex-1 rounded-md bg-white'>
+                render count: {countRef.current++}
                 <pre>{JSON.stringify(ret, null, 4)}</pre>
             </div>
             <div className='h-8 rounded-md bg-white'>
@@ -73,7 +65,7 @@ const TestData = () => {
     );
 };
 
-const Test = () => {
+const TestNoArgWithRetry = () => {
     return (
         <div className='flex h-96 w-[600px] flex-row gap-4 border border-gray-400 bg-slate-200 p-4'>
             <TestData />
@@ -85,4 +77,4 @@ const Test = () => {
     );
 };
 
-export default Test;
+export default TestNoArgWithRetry;

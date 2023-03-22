@@ -1,26 +1,23 @@
 {
     "compilerOptions": {
         "target": "esnext",
-        "lib": ["esnext", "dom", "dom.iterable"],
-        "types": ["vite/client", "node"],
+        "lib": ["esnext"],
+        "types": ["node"],
         "allowJs": false,
         "skipLibCheck": true,
         "esModuleInterop": false,
         "allowSyntheticDefaultImports": true,
         "forceConsistentCasingInFileNames": true,
         "module": "esnext",
+        "sourceMap": false,
         "moduleResolution": "node",
         "isolatedModules": true,
         "noEmit": true,
         "baseUrl": ".",
         "declaration": true,
         "outDir": "dist",
-        "strict": true,
-        "paths": {
-            "jotai-reloadable": ["./src/reloadable.ts"],
-            "jotai-reloadable/simple": ["src/simple/index.ts"]
-        }
+        "strict": true
     },
-    "include": ["./src"],
-    "exclude": ["./node_modules", "./sample", "./sampleJotaiV1", "./dist"]
+    "include": ["src"],
+    "exclude": ["node_modules", "sample", "dist"]
 }

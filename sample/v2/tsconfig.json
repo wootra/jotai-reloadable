@@ -19,6 +19,8 @@
         "baseUrl": ".",
         "paths": {
             "~/*": ["./src/*"]
+            // "jotai-reloadable/*": ["../../src/*"],
+            // "jotai-reloadable": ["../../src"]
         }
     },
     "include": [
@@ -27,7 +29,9 @@
         "src/*.tsx",
         "src/*.cjs",
         "src/*.mjs",
-        "src/*.jsx"
+        "src/*.jsx",
+        "src/*.test.*",
+        "src/__tests__/Basic.test.tsx"
     ],
-    "exclude": ["node_modules"]
+    "exclude": ["node_modules", "src/__tests__/setupTests.ts"]
 }

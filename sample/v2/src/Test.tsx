@@ -1,24 +1,17 @@
-import React from 'react';
-import { useAtomValue, useSetAtom } from 'jotai';
+import React, { MutableRefObject, useRef } from 'react';
+import { createStore } from 'jotai/vanilla';
+import { Provider, useAtomValue } from 'jotai/react';
 import { reloadable } from 'jotai-reloadable';
+import { FORCE_RELOAD } from 'jotai-reloadable/types';
 
-/**
- * jotai v1 has typescript bug. should add @ts-ignore or use jsx.
- */
-
-interface TestApiResult {
-    greeting: string;
-    countVal: { count: number };
-}
-interface TestApiError {
-    error: string;
-    countVal: { count: number };
-}
-
+const store = createStore();
 const countVal = { count: 0 };
 const testApi = async (
     pass: boolean
-): Promise<TestApiResult | TestApiError> => {
+): Promise<
+    | { greeting: string; countVal: { count: number } }
+    | { error: string; countVal: { count: number } }
+> => {
     return new Promise((res, rej) => {
         setTimeout(() => {
             countVal.count++;
@@ -31,23 +24,18 @@ const testApi = async (
     });
 };
 
-const testLoadableAtom = reloadable(testApi, [false]);
+const testLoadableAtom = reloadable(testApi, false);
 
 const LoadPass = ({ forced }: { forced: boolean } = { forced: true }) => {
-    const refresh = useSetAtom(testLoadableAtom);
     return (
         <button
             type='button'
+            data-testid={'load-pass-' + forced ? 'forced' : ''}
             className='rounded-md bg-blue-600 text-white'
             onClick={e =>
                 forced
-                    ? refresh({
-                          // @ts-ignore
-                          args: [true],
-                          options: { forceReload: true },
-                      })
-                    : // @ts-ignore
-                      refresh([true])
+                    ? store.set(testLoadableAtom, FORCE_RELOAD, true)
+                    : store.set(testLoadableAtom, true)
             }
         >
             Reload(pass) {forced ? 'forced' : ''}
@@ -56,19 +44,14 @@ const LoadPass = ({ forced }: { forced: boolean } = { forced: true }) => {
 };
 
 const LoadFail = ({ forced }: { forced: boolean } = { forced: true }) => {
-    const refresh = useSetAtom(testLoadableAtom);
     return (
         <button
+            data-testid={'load-fail' + forced ? 'forced' : ''}
             className='rounded-md bg-blue-600 text-white'
             onClick={e =>
                 forced
-                    ? refresh({
-                          // @ts-ignore
-                          args: [false],
-                          options: { forceReload: true },
-                      })
-                    : // @ts-ignore
-                      refresh([false])
+                    ? store.set(testLoadableAtom, FORCE_RELOAD, false)
+                    : store.set(testLoadableAtom, false)
             }
         >
             Reload(fail) {forced ? 'forced' : ''}
@@ -77,11 +60,15 @@ const LoadFail = ({ forced }: { forced: boolean } = { forced: true }) => {
 };
 
 const TestData = () => {
-    const ret = useAtomValue(testLoadableAtom);
+    const ret = useAtomValue(testLoadableAtom, { store: store });
+    const countRef = useRef(0) as MutableRefObject<number>;
     return (
         <div className='flex h-full flex-1 flex-col gap-4 rounded-md'>
             <div className='h-auto flex-1 rounded-md bg-white'>
-                <pre>{JSON.stringify(ret, null, 4)}</pre>
+                <pre data-testid='result' id='result'>
+                    count is: {countRef.current++}
+                    {JSON.stringify(ret, null, 4)}
+                </pre>
             </div>
             <div className='h-8 rounded-md bg-white'>
                 {ret.state === 'hasData' && JSON.stringify(ret.data)}
@@ -94,15 +81,17 @@ const TestData = () => {
 
 const Test = () => {
     return (
-        <div className='flex h-96 w-[600px] flex-row gap-4 border border-gray-400 bg-slate-200 p-4'>
-            <TestData />
-            <div className='flex w-32 flex-col justify-center gap-4'>
-                <LoadPass forced={true} />
-                <LoadPass forced={false} />
-                <LoadFail forced={true} />
-                <LoadFail forced={false} />
+        <Provider store={store}>
+            <div className='flex h-96 w-[600px] flex-row gap-4 border border-gray-400 bg-slate-200 p-4'>
+                <TestData />
+                <div className='flex w-32 flex-col justify-center gap-4'>
+                    <LoadPass forced={true} />
+                    <LoadPass forced={false} />
+                    <LoadFail forced={true} />
+                    <LoadFail forced={false} />
+                </div>
             </div>
-        </div>
+        </Provider>
     );
 };
 

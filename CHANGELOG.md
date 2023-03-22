@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.4.0
+
+- v1 jotai is not supported because of core difference
+- replace main logic to be simpler using v2 core
+
 ## 1.3.0
 
 - add simpleReloadable
