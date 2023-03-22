@@ -18,176 +18,89 @@
  *
  */
 
-import type { Getter, Setter, WritableAtom } from 'jotai';
-import { atom } from 'jotai';
-import { Loadable } from 'jotai/vanilla/utils/loadable';
-
-export type ReloadableInitOptions = {
-    forceReload?: boolean; // default is false
-    retry?: number; // default is 0
-    printError?: boolean; // default is false
-};
-
-export type ReloadableOptions = {
-    forceReload?: boolean; // default is false
-};
-
-export type ArgsWithOptions<T> = {
-    args?: T;
-    options: ReloadableOptions;
-};
-
-const SELF_RELOAD = '--self-reload--';
-export type SelfReloadOption = typeof SELF_RELOAD;
-
-export type ReloadableAtom<T, ARGS extends any[]> = WritableAtom<
-    Loadable<Awaited<T>>,
-    [action?: SelfReloadOption | ARGS | ArgsWithOptions<ARGS> | undefined],
-    void
->;
-
-type Reloadable<Value> =
-    | { state: 'loading' }
-    | { state: 'hasError'; error: unknown }
-    | { state: 'hasData'; data: Value }
-    | { state: 'init' };
+import type { Getter, Setter } from 'jotai/vanilla';
+import { atom } from 'jotai/vanilla';
+import { loadable } from 'jotai/vanilla/utils';
+import { FORCE_RELOAD, Loadable, ReloadableAtom } from './types';
 
 /**
+ * this is a simple version of reloadable.
+ * you may want to add retry functionality by yourself.
  *
  * @param func function difinition.
- * @param initArgs arguments of the function as an array form. if argument is a, b then, should be [a, b].
- * @param options default is { reloadOnlyError: true }
- * @returns
  */
-export function reloadable<T, ARGS extends any[]>(
-    func: (...args: ARGS) => Promise<T>,
-    initArgs = [] as unknown[] as ARGS,
-    options: ReloadableInitOptions = { forceReload: false }
-): ReloadableAtom<T, ARGS> {
-    const { statusHolder, PromiseWrapper } = buildInitStates(options, func);
-
-    const reloadablePromiseAtom = atom(PromiseWrapper(...initArgs));
-    reloadablePromiseAtom.debugLabel = 'reloadable__reloadablePromiseAtom';
-    const resetAtom = atom(0);
-    resetAtom.debugLabel = 'reloadable__resetAtom';
-    const selfReloadOption = SELF_RELOAD;
-
-    const reloadableAtom = atom(
-        (get: Getter, { setSelf }) => {
-            const data = statusHolder.value;
-            const promise = get(reloadablePromiseAtom);
-            get(resetAtom); // just for reset
-            if (data.state === 'init') {
-                statusHolder.value = { state: 'loading' };
-                promise
-                    .then(result => {
-                        statusHolder.value = result as Loadable<T>; // this could be hasError or hasData
-                        setSelf(selfReloadOption);
-                        return result; // this could be hasError or hasData
-                    })
-                    .catch(err => {
-                        statusHolder.value = { state: 'hasError', error: err };
-                        setSelf(selfReloadOption);
-                    });
-            }
-            return statusHolder.value as Loadable<T>;
-        },
-        (
-            get: Getter,
-            set: Setter,
-            action: ARGS | ArgsWithOptions<ARGS> | SelfReloadOption | undefined
-        ) => {
-            if (action === SELF_RELOAD) {
-                set(resetAtom, get(resetAtom) + 1);
-                return;
-            }
-            const ret = statusHolder.value;
-            const { state } = ret;
-            if (state === 'loading' || state === 'init') return; // when it is already loading, it does not try to load again.
-            const [currArgs, currOptions] = getCurrentValue<ARGS>(
-                action,
-                initArgs,
-                options
-            );
-
-            if (state === 'hasData') {
-                if (currOptions?.forceReload) {
-                    statusHolder.value = { state: 'init' };
-                    set(reloadablePromiseAtom, PromiseWrapper(...currArgs));
-                }
-            } else {
-                statusHolder.value = { state: 'init' };
-                set(reloadablePromiseAtom, PromiseWrapper(...currArgs));
-            }
-        }
-    );
-    reloadableAtom.debugLabel = 'reloadable__reloadableAtom';
-    return reloadableAtom as unknown as ReloadableAtom<T, ARGS>;
-}
-
-function buildInitStates<T, ARGS extends any[]>(
-    options: ReloadableInitOptions,
-    func: (...args: ARGS) => Promise<T>
-) {
-    const statusHolder: { value: Reloadable<T> } = { value: { state: 'init' } };
-    const retrySate = { count: options.retry || 0, init: false };
-    const PromiseWrapper = async (...args: ARGS): Promise<Loadable<T>> => {
+export function reloadable<T, F extends (...args: any[]) => Promise<T>>(
+    func: F,
+    ...initArgs: Parameters<F>
+): ReloadableAtom<T, F> {
+    const infoHolder = {
+        retryCount: 0,
+        retryCountSaved: 0,
+        forceReload: false,
+        func: func,
+        parameters: initArgs,
+    };
+    const wrapper: (
+        funcToRun: F,
+        ...args: Parameters<F>
+    ) => Promise<T> = async (funcToRun, ...args) => {
         try {
-            if (!retrySate.init) {
-                retrySate.init = true;
-                retrySate.count = options.retry || 0;
-            } else {
-                retrySate.count--;
-            }
-            const data = await func(...args);
-            return { state: 'hasData', data: data };
+            const data = await funcToRun(...args);
+            return data as T;
         } catch (e) {
-            if (retrySate.count > 0) {
-                return await PromiseWrapper(...args);
-            }
-            retrySate.init = false;
-            if (options.printError) console.error(e);
-            if (e instanceof Error) {
-                return { state: 'hasError', error: e.message };
+            if (infoHolder.retryCount > 0) {
+                infoHolder.retryCount--;
+                return await wrapper(funcToRun, ...args);
             } else {
-                return { state: 'hasError', error: e };
+                infoHolder.retryCount = infoHolder.retryCountSaved; //reset retry count
+                throw e;
             }
         }
     };
-    return { statusHolder, PromiseWrapper };
-}
+    const baseAtom = atom(wrapper(func, ...initArgs));
+    const loadableAtom = loadable(baseAtom);
+    const reloadableAtom = atom(
+        (get: Getter) => get(loadableAtom) as Loadable<Awaited<T>>,
+        (
+            get: Getter,
+            set: Setter,
+            ...args: Parameters<F> | [typeof FORCE_RELOAD, ...Parameters<F>]
+        ) => {
+            if (args.length === 0) args = infoHolder.parameters;
+            const prevState = get(loadableAtom).state;
+            if (
+                prevState === 'hasError' ||
+                infoHolder.forceReload ||
+                (args as [typeof FORCE_RELOAD, ...Parameters<F>])[0] ===
+                    FORCE_RELOAD ||
+                (args as Parameters<F>).some(
+                    //argument is different, then reload even if previous result passed.
+                    (arg, idx) => infoHolder.parameters[idx] !== arg
+                )
+            ) {
+                // run only when there is an error.
+                if (args[0] === FORCE_RELOAD) {
+                    args.shift();
+                }
+                let newArgs = args as Parameters<F>;
+                if (newArgs.length === 0) newArgs = infoHolder.parameters;
+                else {
+                    infoHolder.parameters = newArgs;
+                }
 
-function getCurrentValue<ARGS>(
-    action: ARGS | ArgsWithOptions<ARGS> | SelfReloadOption | undefined,
-    initArgs: ARGS,
-    options: ReloadableOptions
-) {
-    if (Array.isArray(action)) {
-        return [action, options] as [ARGS, ReloadableOptions];
-    } else if (typeof (action as ArgsWithOptions<ARGS>)?.options === 'object') {
-        const act = action as ArgsWithOptions<ARGS>;
-        return [act.args || (initArgs as ARGS), act.options || options] as [
-            ARGS,
-            ReloadableOptions
-        ];
-    } else {
-        checkActionType<ARGS>(
-            action as ARGS | ArgsWithOptions<ARGS> | undefined
-        );
-        return [initArgs, options] as [ARGS, ReloadableOptions];
-    }
-}
-
-function checkActionType<ARGS>(
-    action: ARGS | ArgsWithOptions<ARGS> | undefined
-) {
-    if (
-        action !== undefined &&
-        !Array.isArray(action) &&
-        typeof action !== 'object'
-    ) {
-        throw new Error(
-            `reloadable atom should be called with one of the types: array(function's argument), { args?:[], } `
-        );
-    }
+                set(baseAtom, wrapper(infoHolder.func, ...newArgs));
+            }
+        }
+    );
+    const copied = {
+        ...reloadableAtom,
+        setRetryCount: (retryCount: number) => {
+            infoHolder.retryCount = retryCount;
+            infoHolder.retryCountSaved = retryCount; //override retry count
+        },
+        setForceReload: (forceReload: boolean) => {
+            infoHolder.forceReload = forceReload;
+        },
+    } as unknown as ReloadableAtom<T, F>;
+    return copied as ReloadableAtom<T, F>;
 }

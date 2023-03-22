@@ -1,6 +1,6 @@
 import React from 'react';
 import { createStore, useAtomValue } from 'jotai';
-import { simpleReloadable as reloadable } from 'jotai-reloadable';
+import { reloadable } from 'jotai-reloadable/simple';
 
 const store = createStore();
 const countVal = { count: 0 };
@@ -21,6 +21,7 @@ const testApi = async (): Promise<
 };
 
 const testLoadableAtom = reloadable(testApi);
+testLoadableAtom.setRetryCount(3);
 
 const Reload = () => {
     return (
@@ -49,10 +50,12 @@ const ReloadForce = () => {
 };
 
 const TestData = () => {
+    const countRef = React.useRef(0);
     const ret = useAtomValue(testLoadableAtom, { store: store });
     return (
         <div className='flex h-full flex-1 flex-col gap-4 rounded-md'>
             <div className='h-auto flex-1 rounded-md bg-white'>
+                render count: {countRef.current++}
                 <pre>{JSON.stringify(ret, null, 4)}</pre>
             </div>
             <div className='h-8 rounded-md bg-white'>

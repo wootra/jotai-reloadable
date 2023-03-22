@@ -17,8 +17,11 @@
         "incremental": true,
         "noUncheckedIndexedAccess": true,
         "baseUrl": ".",
+        "rootDir": "../..",
         "paths": {
             "~/*": ["./src/*"]
+            // "jotai-reloadable/*": ["../../src/*"],
+            // "jotai-reloadable": ["../../src"]
         }
     },
     "include": [

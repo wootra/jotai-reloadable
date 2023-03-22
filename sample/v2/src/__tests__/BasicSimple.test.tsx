@@ -7,7 +7,7 @@ import { it, describe, expect, vi, beforeEach, afterEach } from 'vitest';
 // import { Window } from 'happy-dom';
 import { render, screen, cleanup } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-import { simpleReloadable as reloadable } from 'jotai-reloadable';
+import { reloadable } from 'jotai-reloadable/simple';
 import { createStore, Provider, useAtom, useAtomValue } from 'jotai';
 
 type ServiceReturn = { pass: true; count: number };

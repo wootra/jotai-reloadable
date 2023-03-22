@@ -4,14 +4,18 @@
     "description": "this allows jotai/utils/loadable reloadable. you should install jotai to use this module. ",
     "scripts": {
         "sample-test": "cd $CURRPATH; yarn run test --run",
-        "test": "CURRPATH=$(pwd)/sample/v2 yarn run sample-test;CURRPATH=$(pwd)/sample/v1.12.1 yarn run sample-test",
-        "clear": "cd $CURRPATH; pnpm rm jotai-reloadable; pnpm i jotai-reloadable@file:..",
-        "build-all": "rm -rf ./dist; yarn run build; CURRPATH=$(pwd)/sample/v1.12.1 yarn run clear ; CURRPATH=$(pwd)/sample/v2 yarn run clear",
+        "sample-test:local": "cd $CURRPATH; pnpm run test --run",
+        "test": "CURRPATH=$(pwd)/sample/v2 yarn run sample-test",
+        "test:local": "CURRPATH=$(pwd)/sample/v2 pnpm run sample-test",
+        "clear": "cd $CURRPATH; yarn run clear",
+        "clear:local": "cd $CURRPATH; echo ${pwd}; pnpm clear:local",
+        "build-all": "rm -rf ./dist; yarn run build; sleep 3; CURRPATH=$(pwd)/sample/v2 yarn run clear",
+        "build-all:local": "rm -rf ./dist; pnpm run build; sleep 3;CURRPATH=$(pwd);cd $CURRPATH/sample/v2;pnpm run clear:local",
         "ci:m:server": "echo 'installing on $CURRPATH'; cd $CURRPATH; yarn install --immutable --immutable-cache --check-cache",
         "ci:m:local": "echo 'installing on $CURRPATH'; cd $CURRPATH; pnpm i",
-        "ci:local": "CURRPATH=. pnpm run ci:m:local;CURRPATH=$(pwd)/sample/v2 pnpm run ci:m:local;CURRPATH=$(pwd)/sample/v1.12.1 pnpm run ci:m:local",
-        "ci:server": "CURRPATH=. yarn run ci:m:server;CURRPATH=$(pwd)/sample/v2 yarn run ci:m:server;CURRPATH=$(pwd)/sample/v1.12.1 yarn run ci:m:server",
-        "build": "tsc && vite build"
+        "ci:local": "CURRPATH=. pnpm run ci:m:local;CURRPATH=$(pwd)/sample/v2 pnpm run ci:m:local",
+        "ci:server": "CURRPATH=. yarn run ci:m:server;CURRPATH=$(pwd)/sample/v2 yarn run ci:m:server",
+        "build": "tsc && vite build && cp ./package_file_backup/package.json ./dist"
     },
     "main": "./dist/index.js",
     "module": "./dist/index.mjs",
@@ -28,6 +32,26 @@
             "types": "./dist/index.d.ts",
             "import": "./dist/index.mjs",
             "require": "./dist/index.js"
+        },
+        "./reloadable": {
+            "types": "./dist/reloadable.d.ts",
+            "import": "./dist/index2.mjs",
+            "require": "./dist/index2.js"
+        },
+        "./simple": {
+            "types": "./dist/simple.d.ts",
+            "import": "./dist/index3.mjs",
+            "require": "./dist/index3.js"
+        },
+        "./cancelable": {
+            "types": "./dist/cancelable.d.ts",
+            "import": "./dist/index4.mjs",
+            "require": "./dist/index4.js"
+        },
+        "./types": {
+            "types": "./dist/types.d.ts",
+            "import": "./dist/index5.mjs",
+            "require": "./dist/index5.js"
         }
     },
     "keywords": [
@@ -51,9 +75,10 @@
         "@types/react": "^18.0.28",
         "@types/react-dom": "^18.0.10",
         "@vitejs/plugin-react": "^3.1.0",
-        "jotai": "^2.0.3",
+        "jotai": "1.12.1",
         "react": "^18.2.0",
-        "typescript": "^4.9.5"
+        "rollup-plugin-peer-deps-external": "^2.2.4",
+        "typescript": "^5.0.2"
     },
     "dependencies": {
         "rollup-plugin-typescript-paths": "^1.4.0",

@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react'; // this line is essential to
 import { it, describe, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-import { reloadable } from '../../../src/index';
+import { reloadable } from 'jotai-reloadable';
 import { createStore, Provider, useAtom, useAtomValue } from 'jotai';
 
 const createServiceCall = (passCount = 3) => {

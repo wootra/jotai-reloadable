@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { MutableRefObject, useRef } from 'react';
 import { createStore } from 'jotai/vanilla';
 import { Provider, useAtomValue } from 'jotai/react';
 import { reloadable } from 'jotai-reloadable';
+import { FORCE_RELOAD } from 'jotai-reloadable/types';
 
 const store = createStore();
 const countVal = { count: 0 };
@@ -23,7 +24,7 @@ const testApi = async (
     });
 };
 
-const testLoadableAtom = reloadable(testApi, [false]);
+const testLoadableAtom = reloadable(testApi, false);
 
 const LoadPass = ({ forced }: { forced: boolean } = { forced: true }) => {
     return (
@@ -33,11 +34,8 @@ const LoadPass = ({ forced }: { forced: boolean } = { forced: true }) => {
             className='rounded-md bg-blue-600 text-white'
             onClick={e =>
                 forced
-                    ? store.set(testLoadableAtom, {
-                          args: [true],
-                          options: { forceReload: true },
-                      })
-                    : store.set(testLoadableAtom, [true])
+                    ? store.set(testLoadableAtom, FORCE_RELOAD, true)
+                    : store.set(testLoadableAtom, true)
             }
         >
             Reload(pass) {forced ? 'forced' : ''}
@@ -52,11 +50,8 @@ const LoadFail = ({ forced }: { forced: boolean } = { forced: true }) => {
             className='rounded-md bg-blue-600 text-white'
             onClick={e =>
                 forced
-                    ? store.set(testLoadableAtom, {
-                          args: [false],
-                          options: { forceReload: true },
-                      })
-                    : store.set(testLoadableAtom, [false])
+                    ? store.set(testLoadableAtom, FORCE_RELOAD, false)
+                    : store.set(testLoadableAtom, false)
             }
         >
             Reload(fail) {forced ? 'forced' : ''}
@@ -64,15 +59,14 @@ const LoadFail = ({ forced }: { forced: boolean } = { forced: true }) => {
     );
 };
 
-let count = 0;
 const TestData = () => {
     const ret = useAtomValue(testLoadableAtom, { store: store });
-
+    const countRef = useRef(0) as MutableRefObject<number>;
     return (
         <div className='flex h-full flex-1 flex-col gap-4 rounded-md'>
             <div className='h-auto flex-1 rounded-md bg-white'>
                 <pre data-testid='result' id='result'>
-                    count is: {count++}
+                    count is: {countRef.current++}
                     {JSON.stringify(ret, null, 4)}
                 </pre>
             </div>

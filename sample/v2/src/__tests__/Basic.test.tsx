@@ -7,7 +7,7 @@ import { it, describe, expect, vi, beforeEach, afterEach } from 'vitest';
 // import { Window } from 'happy-dom';
 import { render, screen, cleanup } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-import { reloadable } from '../../../src/index';
+import { reloadable } from 'jotai-reloadable';
 import { createStore, Provider, useAtom, useAtomValue } from 'jotai';
 
 const createServiceCall = (passCount = 3) => {
@@ -65,7 +65,8 @@ describe('Basic', () => {
         });
         it('should render', async () => {
             const TestPass = createComponent();
-            await act(() => render(<TestPass />));
+            render(<TestPass />);
+            // await act(() => render(<TestPass />));
             expect(screen.getByTestId('result')).toBeTruthy();
         });
 

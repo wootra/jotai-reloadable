@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { createStore, useAtomValue } from 'jotai';
 import { reloadable } from 'jotai-reloadable';
+import React from 'react';
 
 const store = createStore();
 const countVal = { count: 0 };
@@ -23,39 +24,16 @@ const testApi = async pass => {
     });
 };
 
-const testLoadableAtom = reloadable(testApi, [false]);
-
-const LoadPassWrong = () => {
-    return (
-        <button
-            type='button'
-            className='rounded-md bg-blue-600 text-white'
-            onClick={e => store.set(testLoadableAtom, true)}
-        >
-            Reload(pass) Wrong Type
-        </button>
-    );
-};
+const testLoadableAtom = reloadable(testApi, false);
 
 const LoadPass = () => {
     return (
         <button
             type='button'
             className='rounded-md bg-blue-600 text-white'
-            onClick={e => store.set(testLoadableAtom, [true])}
+            onClick={e => store.set(testLoadableAtom, true)}
         >
             Reload(pass)
-        </button>
-    );
-};
-
-const LoadFailWrong = () => {
-    return (
-        <button
-            className='rounded-md bg-blue-600 text-white'
-            onClick={e => store.set(testLoadableAtom, false)}
-        >
-            Reload(fail) Wrong Type
         </button>
     );
 };
@@ -64,7 +42,7 @@ const LoadFail = () => {
     return (
         <button
             className='rounded-md bg-blue-600 text-white'
-            onClick={e => store.set(testLoadableAtom, [false])}
+            onClick={e => store.set(testLoadableAtom, false)}
         >
             Reload(fail)
         </button>
@@ -72,10 +50,12 @@ const LoadFail = () => {
 };
 
 const TestData = () => {
+    const countRef = React.useRef(0);
     const ret = useAtomValue(testLoadableAtom, { store: store });
     return (
         <div className='flex h-full flex-1 flex-col gap-4 rounded-md'>
             <div className='h-auto flex-1 rounded-md bg-white'>
+                render count: {countRef.current++}
                 <pre>{JSON.stringify(ret, null, 4)}</pre>
             </div>
             <div className='h-8 rounded-md bg-white'>
@@ -92,9 +72,7 @@ const Test = () => {
         <div className='flex h-96 w-[600px] flex-row gap-4 border border-gray-400 bg-slate-200 p-4'>
             <TestData />
             <div className='flex w-32 flex-col justify-center gap-4'>
-                <LoadPassWrong />
                 <LoadPass />
-                <LoadFailWrong />
                 <LoadFail />
             </div>
         </div>

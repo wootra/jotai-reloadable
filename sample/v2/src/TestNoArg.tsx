@@ -39,11 +39,7 @@ const ReloadForce = () => {
         <button
             type='button'
             className='rounded-md bg-blue-600 text-white'
-            onClick={e =>
-                store.set(testLoadableAtom, {
-                    options: { forceReload: true },
-                })
-            }
+            onClick={e => store.set(testLoadableAtom)}
         >
             Reload(pass) Forced
         </button>
@@ -51,10 +47,16 @@ const ReloadForce = () => {
 };
 
 const TestData = () => {
+    const countRef = React.useRef({ count: 0, arr: [] as any[] });
     const ret = useAtomValue(testLoadableAtom, { store: store });
+    countRef.current.count++;
+    countRef.current.arr.push(
+        JSON.parse(JSON.stringify(ret)) as { count: number; arr: [] }
+    );
     return (
         <div className='flex h-full flex-1 flex-col gap-4 rounded-md'>
             <div className='h-auto flex-1 rounded-md bg-white'>
+                render count: {JSON.stringify(countRef.current, null, 4)}
                 <pre>{JSON.stringify(ret, null, 4)}</pre>
             </div>
             <div className='h-8 rounded-md bg-white'>
