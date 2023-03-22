@@ -27,7 +27,7 @@ const createServiceCall = (passCount = 3) => {
 
 const createComponent = () => {
     const serviceToCall = createServiceCall();
-    const reloadableAtom = reloadable<ServiceReturn>(serviceToCall);
+    const reloadableAtom = reloadable(serviceToCall);
     const store = createStore();
 
     return function () {
