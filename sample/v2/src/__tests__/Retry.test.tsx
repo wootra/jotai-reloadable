@@ -24,7 +24,8 @@ const createServiceCall = (passCount = 3) => {
 
 const createComponent = (retry = 2) => {
     const serviceToCall = createServiceCall();
-    const reloadableAtom = reloadable(serviceToCall, [], { retry });
+    const reloadableAtom = reloadable(serviceToCall);
+    reloadableAtom.setRetryCount(2);
     const store = createStore();
 
     return function () {

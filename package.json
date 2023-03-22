@@ -13,9 +13,9 @@
         "build-all:local": "rm -rf ./dist; pnpm run build; sleep 3;CURRPATH=$(pwd);cd $CURRPATH/sample/v2;pnpm run clear:local",
         "ci:m:server": "echo 'installing on $CURRPATH'; cd $CURRPATH; yarn install --immutable --immutable-cache --check-cache",
         "ci:m:local": "echo 'installing on $CURRPATH'; cd $CURRPATH; pnpm i",
-        "ci:local": "CURRPATH=. pnpm run ci:m:local;CURRPATH=$(pwd)/sample/v2 pnpm run ci:m:local",
-        "ci:server": "CURRPATH=. yarn run ci:m:server;CURRPATH=$(pwd)/sample/v2 yarn run ci:m:server",
-        "build": "tsc && vite build"
+        "ci:local": "CURRPATH=${pwd} pnpm run ci:m:local;CURRPATH=$(pwd)/sample/v2 pnpm run ci:m:local",
+        "ci:server": "CURRPATH=${pwd} yarn run ci:m:server;CURRPATH=$(pwd)/sample/v2 yarn run ci:m:server",
+        "build": "yarn install && tsc && vite build"
     },
     "main": "./dist/index.js",
     "module": "./dist/index.mjs",
